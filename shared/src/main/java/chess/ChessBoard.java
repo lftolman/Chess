@@ -40,8 +40,49 @@ public class ChessBoard {
      * (How the game of chess normally starts)
      */
     public void resetBoard() {
-        throw new RuntimeException("Not implemented");
-    }
+        for (int col = 1; col < 9; col++) {
+            ChessPiece piece = new ChessPiece(ChessGame.TeamColor.WHITE, ChessPiece.PieceType.PAWN);
+            addPiece(new ChessPosition(2, col), piece);}
+        for (int col = 1; col < 9; col++) {
+            ChessPiece piece = new ChessPiece(ChessGame.TeamColor.BLACK, ChessPiece.PieceType.PAWN);
+            addPiece(new ChessPosition(7, col), piece);}
+
+        ChessPiece rook = new ChessPiece(ChessGame.TeamColor.BLACK, ChessPiece.PieceType.ROOK);
+        addPiece(new ChessPosition(8, 1), rook);
+        addPiece(new ChessPosition(8, 8), rook);
+
+        ChessPiece rook2 = new ChessPiece(ChessGame.TeamColor.WHITE, ChessPiece.PieceType.ROOK);
+        addPiece(new ChessPosition(1, 1), rook2);
+        addPiece(new ChessPosition(1, 8), rook2);
+
+        ChessPiece knight = new ChessPiece(ChessGame.TeamColor.BLACK, ChessPiece.PieceType.ROOK);
+        addPiece(new ChessPosition(8, 2), knight);
+        addPiece(new ChessPosition(8, 7), knight);
+
+        ChessPiece knight2 = new ChessPiece(ChessGame.TeamColor.WHITE, ChessPiece.PieceType.ROOK);
+        addPiece(new ChessPosition(1, 2), knight2);
+        addPiece(new ChessPosition(1, 7), knight2);
+
+        ChessPiece bishop = new ChessPiece(ChessGame.TeamColor.BLACK, ChessPiece.PieceType.BISHOP);
+        addPiece(new ChessPosition(8, 3), bishop);
+        addPiece(new ChessPosition(8, 6), bishop);
+
+        ChessPiece bishop2 = new ChessPiece(ChessGame.TeamColor.WHITE, ChessPiece.PieceType.BISHOP);
+        addPiece(new ChessPosition(1, 3), bishop2);
+        addPiece(new ChessPosition(1, 6), bishop2);
+
+        ChessPiece queen = new ChessPiece(ChessGame.TeamColor.BLACK, ChessPiece.PieceType.QUEEN);
+        addPiece(new ChessPosition(8, 4), queen);
+
+        ChessPiece queen2 = new ChessPiece(ChessGame.TeamColor.WHITE, ChessPiece.PieceType.QUEEN);
+        addPiece(new ChessPosition(1, 4), queen2);
+
+        ChessPiece king = new ChessPiece(ChessGame.TeamColor.BLACK, ChessPiece.PieceType.QUEEN);
+        addPiece(new ChessPosition(8, 5), king);
+
+        ChessPiece king2 = new ChessPiece(ChessGame.TeamColor.WHITE, ChessPiece.PieceType.QUEEN);
+        addPiece(new ChessPosition(1, 5), king2);}
+
 
     @Override
     public boolean equals(Object o) {
