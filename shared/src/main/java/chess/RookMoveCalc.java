@@ -16,7 +16,7 @@ public class RookMoveCalc implements PieceMovesCalculator {
                 int i = rows[k];
                 int j = cols[k];
             updateStep(board, myPosition, moves, row, col, i, j);
-        };
+        }
 
         return moves;}
 

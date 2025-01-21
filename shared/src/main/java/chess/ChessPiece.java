@@ -75,30 +75,13 @@ public class ChessPiece {
      * @return Collection of valid moves
      */
     public Collection<ChessMove> pieceMoves(ChessBoard board, ChessPosition myPosition) {
-        if (pieceType == ChessPiece.PieceType.BISHOP) {
-            return BishopMoveCalc.getMoves(board, myPosition);
-        }
-        else if (pieceType == ChessPiece.PieceType.ROOK) {
-            return RookMoveCalc.getMoves(board, myPosition);
-        }
-        else if(pieceType == ChessPiece.PieceType.QUEEN){
-            return QueenMoveCalculator.getMoves(board, myPosition);
-        }
-        else if (pieceType == ChessPiece.PieceType.KING){
-            return KingMoveCalc.getMoves(board, myPosition);
-        }
-        else if (pieceType == ChessPiece.PieceType.KNIGHT){
-            return KnightMoveCalc.getMoves(board, myPosition);
-        }
-        else{
-            return null;
-        }
-//        return switch (pieceType) {
-//            case BISHOP: BishopMoveCalc.getMoves(board, myPosition);
-//            case KNIGHT: KnightMoveCalc.getMoves(board, myPosition);
-//            case ROOK: RookMoveCalc.getMoves(board, myPosition);
-//            case PAWN: PawnMoveCalc.getMoves(board, myPosition);
-//            case KING: KingMoveCalc.getMoves(board, myPosition);
-//            case QUEEN: QueenMoveCalculator.getMoves(board, myPosition);
-//        }
+        return switch (getPieceType()){
+            case QUEEN ->  QueenMoveCalc.getMoves(board,myPosition);
+            case KING ->  KingMoveCalc.getMoves(board,myPosition);
+            case BISHOP ->  BishopMoveCalc.getMoves(board,myPosition);
+            case KNIGHT ->  KnightMoveCalc.getMoves(board,myPosition);
+            case ROOK ->  RookMoveCalc.getMoves(board,myPosition);
+            case PAWN ->  PawnMoveCalc.getMoves(board,myPosition);
+        };
+
 }}

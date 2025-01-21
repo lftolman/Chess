@@ -15,7 +15,7 @@ public class BishopMoveCalc implements PieceMovesCalculator {
                     RookMoveCalc.updateStep(board, myPosition, moves, row, col, i, j);
 
                 }
-            };
+            }
 
         return moves;}
 }
