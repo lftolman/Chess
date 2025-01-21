@@ -35,10 +35,18 @@ public class ChessPiece {
 
     @Override
     public String toString() {
-        return "ChessPiece{" +
-                "teamColor=" + teamColor +
-                ", pieceType=" + pieceType +
-                '}';
+        if (teamColor == ChessGame.TeamColor.BLACK && pieceType == PieceType.PAWN) {return "p";};
+        if (teamColor == ChessGame.TeamColor.WHITE && pieceType == PieceType.PAWN) {return "P";};
+        if (teamColor == ChessGame.TeamColor.BLACK && pieceType == PieceType.KNIGHT) {return "n";};
+        if (teamColor == ChessGame.TeamColor.WHITE && pieceType == PieceType.KNIGHT) {return "N";};
+        if (teamColor == ChessGame.TeamColor.BLACK && pieceType == PieceType.BISHOP) {return "b";};
+        if (teamColor == ChessGame.TeamColor.WHITE && pieceType == PieceType.BISHOP) {return "B";};
+        if (teamColor == ChessGame.TeamColor.BLACK && pieceType == PieceType.ROOK) {return "r";};
+        if (teamColor == ChessGame.TeamColor.WHITE && pieceType == PieceType.ROOK) {return "R";};
+        if (teamColor == ChessGame.TeamColor.BLACK && pieceType == PieceType.QUEEN) {return "q";};
+        if (teamColor == ChessGame.TeamColor.WHITE && pieceType == PieceType.QUEEN) {return "Q";};
+        if (teamColor == ChessGame.TeamColor.BLACK && pieceType == PieceType.KING) {return "k";};
+        return "K";
     }
 
     /**

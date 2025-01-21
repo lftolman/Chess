@@ -11,9 +11,7 @@ import java.util.Objects;
  */
 public class ChessBoard {
     private ChessPiece[][] squares = new ChessPiece[8][8];
-    public ChessBoard() {
-        
-    }
+    public ChessBoard() {}
 
     /**
      * Adds a chess piece to the chessboard
@@ -55,11 +53,11 @@ public class ChessBoard {
         addPiece(new ChessPosition(1, 1), rook2);
         addPiece(new ChessPosition(1, 8), rook2);
 
-        ChessPiece knight = new ChessPiece(ChessGame.TeamColor.BLACK, ChessPiece.PieceType.ROOK);
+        ChessPiece knight = new ChessPiece(ChessGame.TeamColor.BLACK, ChessPiece.PieceType.KNIGHT);
         addPiece(new ChessPosition(8, 2), knight);
         addPiece(new ChessPosition(8, 7), knight);
 
-        ChessPiece knight2 = new ChessPiece(ChessGame.TeamColor.WHITE, ChessPiece.PieceType.ROOK);
+        ChessPiece knight2 = new ChessPiece(ChessGame.TeamColor.WHITE, ChessPiece.PieceType.KNIGHT);
         addPiece(new ChessPosition(1, 2), knight2);
         addPiece(new ChessPosition(1, 7), knight2);
 
@@ -77,10 +75,10 @@ public class ChessBoard {
         ChessPiece queen2 = new ChessPiece(ChessGame.TeamColor.WHITE, ChessPiece.PieceType.QUEEN);
         addPiece(new ChessPosition(1, 4), queen2);
 
-        ChessPiece king = new ChessPiece(ChessGame.TeamColor.BLACK, ChessPiece.PieceType.QUEEN);
+        ChessPiece king = new ChessPiece(ChessGame.TeamColor.BLACK, ChessPiece.PieceType.KING);
         addPiece(new ChessPosition(8, 5), king);
 
-        ChessPiece king2 = new ChessPiece(ChessGame.TeamColor.WHITE, ChessPiece.PieceType.QUEEN);
+        ChessPiece king2 = new ChessPiece(ChessGame.TeamColor.WHITE, ChessPiece.PieceType.KING);
         addPiece(new ChessPosition(1, 5), king2);}
 
 
@@ -100,8 +98,19 @@ public class ChessBoard {
 
     @Override
     public String toString() {
-        return "ChessBoard{" +
-                "squares=" + Arrays.toString(squares) +
-                '}';
+        StringBuilder sb = new StringBuilder();
+        for (int row = 7; row >= 0; row--) {
+            sb.append("|");
+            for (int col = 0; col < 8; col++) {
+                if (squares[row][col] != null){
+                    sb.append(squares[row][col].toString());}
+                else {
+                    sb.append(" ");}
+                sb.append("|");
+            }
+            sb.append("\n");
+        }
+
+        return sb.toString();
     }
 }
