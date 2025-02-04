@@ -20,7 +20,6 @@ public class ChessGame {
         board = new ChessBoard();
         board.resetBoard();
         setTeamTurn(TeamColor.WHITE);
-
     }
 
     /**
@@ -109,7 +108,7 @@ public class ChessGame {
         boolean legal = isInCheck(color);
         board.addPiece(start,mover);
         board.removePiece(end);
-        board.addPiece(end,mover);
+        board.addPiece(end,temp);
         return legal;
     }
     /**
@@ -119,7 +118,19 @@ public class ChessGame {
      * @return True if the specified team is in check
      */
     public boolean isInCheck(TeamColor teamColor) {
-        throw new RuntimeException("Not implemented");
+        for (int i = 1; i<9; i++){
+            for (int j = 1; j<9; j++){
+                ChessPosition position = new ChessPosition(i,j);
+                ChessPiece piece = board.getPiece(position);
+                if (piece != null && (piece.getTeamColor() != teamColor)){
+                    for (var move: piece.pieceMoves(board,position)){
+                        if (board.getPiece(move.getEndPosition()).getPieceType()== ChessPiece.PieceType.KING){
+                            return true;}
+                    }
+                }
+            }
+        }
+        return false;
     }
 
     /**
