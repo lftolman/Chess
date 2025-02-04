@@ -1,8 +1,6 @@
 package chess;
 
-import java.lang.reflect.Array;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.Objects;
 
@@ -153,20 +151,27 @@ public class ChessGame {
      * @return True if the specified team is in check
      */
     public boolean isInCheck(TeamColor teamColor) {
-        for (int i = 1; i<9; i++){
-            for (int j = 1; j<9; j++){
-                ChessPosition position = new ChessPosition(i,j);
-                ChessPiece piece = board.getPiece(position);
-                if ((piece != null) && (piece.getTeamColor() != teamColor)){
-                    for (var move: piece.pieceMoves(board,position)){
+        for (var position: traverseBoard()){
+            ChessPiece piece = board.getPiece(position);
+            if ((piece != null) && (piece.getTeamColor() != teamColor)){
+                for (var move: piece.pieceMoves(board,position)){
                         ChessPiece endPiece= board.getPiece(move.getEndPosition());
                         if ((endPiece != null) && (endPiece.getPieceType()== ChessPiece.PieceType.KING)){
                             return true;}
                     }
                 }
-            }
         }
         return false;
+    }
+
+    Collection<ChessPosition> traverseBoard(){
+        Collection<ChessPosition> positions = new ArrayList<>();
+        for (int i = 1; i<9; i++) {
+            for (int j = 1; j < 9; j++) {
+                positions.add(new ChessPosition(i,j));
+            }
+        }
+        return positions;
     }
 
     /**
@@ -189,19 +194,16 @@ public class ChessGame {
      */
     public boolean isInStalemate(TeamColor teamColor) {
         boolean kingThreatened = isInCheck(teamColor);
-        for (int i = 1; i<9; i++){
-            for (int j = 1; j<9; j++){
-                ChessPosition position = new ChessPosition(i,j);
-                ChessPiece piece = board.getPiece(position);
-                if (piece != null && (piece.getTeamColor() == teamColor)){
-                    for (var move: piece.pieceMoves(board,position)){
-                        boolean legal = tryMove(move);
-                        if (legal){
-                            anyLegalMoves = true;
-                            return false;}
+        for (var position: traverseBoard()){
+            ChessPiece piece = board.getPiece(position);
+            if (piece != null && (piece.getTeamColor() == teamColor)){
+                for (var move: piece.pieceMoves(board,position)){
+                    boolean legal = tryMove(move);
+                    if (legal){
+                        anyLegalMoves = true;
+                        return false;}
                     }
                 }
-            }
         }
         return !kingThreatened;
     }

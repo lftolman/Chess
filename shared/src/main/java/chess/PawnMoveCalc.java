@@ -7,7 +7,8 @@ public class PawnMoveCalc implements PieceMovesCalculator{
     public static Collection<ChessMove> getMoves(ChessBoard chessBoard, ChessPosition myPosition) {
         Collection<ChessMove> moves = new ArrayList<>();
         ArrayList<ChessPiece.PieceType> pieces = new ArrayList<>();
-        pieces.add(ChessPiece.PieceType.QUEEN); pieces.add(ChessPiece.PieceType.BISHOP); pieces.add(ChessPiece.PieceType.ROOK); pieces.add(ChessPiece.PieceType.KNIGHT);
+        pieces.add(ChessPiece.PieceType.QUEEN); pieces.add(ChessPiece.PieceType.BISHOP);
+        pieces.add(ChessPiece.PieceType.ROOK);pieces.add(ChessPiece.PieceType.KNIGHT);
         int row = myPosition.getRow();
         int col = myPosition.getColumn();
         ChessPiece myPiece = chessBoard.getPiece(myPosition);

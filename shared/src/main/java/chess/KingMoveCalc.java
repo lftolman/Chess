@@ -14,9 +14,9 @@ public class KingMoveCalc implements PieceMovesCalculator{
             for (var j: cols) {
                 int newRow = row + i;
                 int newCol = col + j;
-                ChessPosition new_position = new ChessPosition(newRow,newCol);
-                if (PieceMovesCalculator.checkSquare(chessBoard,myPosition,new_position)[0]){
-                    ChessMove move = new ChessMove(myPosition,new_position, null);
+                ChessPosition newPosition = new ChessPosition(newRow,newCol);
+                if (PieceMovesCalculator.checkSquare(chessBoard,myPosition,newPosition)[0]){
+                    ChessMove move = new ChessMove(myPosition,newPosition, null);
                     moves.add(move);}
             }
         }

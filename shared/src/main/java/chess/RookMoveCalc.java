@@ -24,16 +24,16 @@ public class RookMoveCalc implements PieceMovesCalculator {
         int step = 1;
         int newRow = row + step*i;
         int newCol = col + step*j;
-        ChessPosition new_position = new ChessPosition(newRow,newCol);
-        while (PieceMovesCalculator.checkSquare(board,myPosition,new_position)[0]){
-            ChessMove move = new ChessMove(myPosition,new_position, null);
+        ChessPosition newPosition = new ChessPosition(newRow,newCol);
+        while (PieceMovesCalculator.checkSquare(board,myPosition,newPosition)[0]){
+            ChessMove move = new ChessMove(myPosition,newPosition, null);
             moves.add(move);
             System.out.println(move);
-            if (PieceMovesCalculator.checkSquare(board,myPosition,new_position)[1]){
+            if (PieceMovesCalculator.checkSquare(board,myPosition,newPosition)[1]){
                 step ++;
                 newRow = row + step*i;
                 newCol = col + step*j;
-                new_position = new ChessPosition(newRow,newCol);}
+                newPosition = new ChessPosition(newRow,newCol);}
             else{
                 break;
             }
