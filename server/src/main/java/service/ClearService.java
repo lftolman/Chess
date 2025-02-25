@@ -1,5 +1,6 @@
 package service;
 import dataaccess.AuthDataAccess;
+import dataaccess.DataAccessException;
 import dataaccess.GameDataAccess;
 import dataaccess.UserDataAccess;
 import model.*;
@@ -16,9 +17,13 @@ public class ClearService {
         this.userDAO = uDAO;
     }
     public void clearApplication(ClearAppRequest clearAppRequest){
-        userDAO.deleteUserData();
-        authDAO.deleteAuthData();
-        gameDAO.deleteGames();
+        try {
+            userDAO.deleteUserData();
+            authDAO.deleteAuthData();
+            gameDAO.deleteGames();
+        } catch (DataAccessException e) {
+            throw new RuntimeException(e);
+        }
     }
 
 }
