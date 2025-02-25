@@ -3,6 +3,7 @@ import dataaccess.AuthDataAccess;
 import dataaccess.DataAccessException;
 import dataaccess.GameDataAccess;
 import dataaccess.UserDataAccess;
+import exception.ResponseException;
 import model.*;
 
 public class ClearService {
@@ -16,13 +17,13 @@ public class ClearService {
         this.authDAO = aDAO;
         this.userDAO = uDAO;
     }
-    public void clearApplication(ClearAppRequest clearAppRequest){
+    public void clearApplication(ClearAppRequest clearAppRequest) throws ResponseException {
         try {
             userDAO.deleteUserData();
             authDAO.deleteAuthData();
             gameDAO.deleteGames();
         } catch (DataAccessException e) {
-            throw new RuntimeException(e);
+            throw new ResponseException(500,"Error: %e");
         }
     }
 

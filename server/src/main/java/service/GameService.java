@@ -3,6 +3,7 @@ import chess.ChessGame;
 import dataaccess.AuthDataAccess;
 import dataaccess.DataAccessException;
 import dataaccess.GameDataAccess;
+import exception.ResponseException;
 import model.*;
 
 import java.util.UUID;
@@ -51,23 +52,29 @@ public class GameService {
 
     }
 
-    public void joinGame(JoinGameRequest joinGameRequest) throws DataAccessException {
-        GameData gameData = gameDAO.getGame(joinGameRequest.gameID());
-        AuthData authData = authDAO.getAuth(joinGameRequest.authToken());
-        if (authData == null){
-            throw new DataAccessException("Error: unauthorized");
-        }
+    public void joinGame(JoinGameRequest joinGameRequest) throws ResponseException {
         try{
-        if ((gameData.whiteUsername() == null)&& joinGameRequest.playerColor()== ChessGame.TeamColor.WHITE){
-            GameData newData = new GameData(gameID,authData.username(),gameData.blackUsername(), gameData.gameName(), gameData.game());
-            gameDAO.updateGame(joinGameRequest.gameID(),newData);
-        }
-        else if ((gameData.blackUsername() == null)&& joinGameRequest.playerColor()== ChessGame.TeamColor.BLACK){
-            GameData newData = new GameData(gameID,gameData.whiteUsername(),authData.username(), gameData.gameName(), gameData.game());
-            gameDAO.updateGame(joinGameRequest.gameID(),newData);
-        }
+            GameData gameData = gameDAO.getGame(joinGameRequest.gameID());
+            AuthData authData = authDAO.getAuth(joinGameRequest.authToken());
+            if (authData == null){
+                throw new ResponseException(401,"Error: unauthorized");
+            }
+            if (gameData == null){
+                throw new ResponseException(400,"Error: bad request");
+            }
+            if ((gameData.whiteUsername() == null)&& joinGameRequest.playerColor()== ChessGame.TeamColor.WHITE){
+                GameData newData = new GameData(gameID,authData.username(),gameData.blackUsername(), gameData.gameName(), gameData.game());
+                gameDAO.updateGame(joinGameRequest.gameID(),newData);
+            }
+            else if ((gameData.blackUsername() == null)&& joinGameRequest.playerColor()== ChessGame.TeamColor.BLACK){
+                GameData newData = new GameData(gameID,gameData.whiteUsername(),authData.username(), gameData.gameName(), gameData.game());
+                gameDAO.updateGame(joinGameRequest.gameID(),newData);
+            }
+            else{
+                throw new ResponseException(403,"Error: already taken");
+            }
         }catch (DataAccessException e){
-            throw new DataAccessException("Error:Player color in use");
+            throw new ResponseException(500,"Error: &e");
         }
     }
 }
