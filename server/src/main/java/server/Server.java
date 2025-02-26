@@ -40,7 +40,7 @@ public class Server {
         Spark.get("/game", gameHandler::listGames);
         Spark.post("/game", gameHandler::createGame);
         Spark.put("/game", gameHandler::joinGame);
-        Spark.put("/db",clearHandler::clearApplication);
+        Spark.delete("/db",clearHandler::clearApplication);
 
         Spark.exception(ResponseException.class,this::exceptionHandler);
 

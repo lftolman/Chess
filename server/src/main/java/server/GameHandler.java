@@ -8,6 +8,8 @@ import service.GameService;
 import spark.Request;
 import spark.Response;
 
+import java.util.HashMap;
+
 public class GameHandler {
     GameService gameService;
     public GameHandler(GameService gameService){
@@ -27,7 +29,13 @@ public class GameHandler {
     }
 
     public Object createGame(Request req, Response res) throws ResponseException{
-        CreateGameRequest createGameRequest = new CreateGameRequest(req.headers("authorization"),req.body());
+        var data = new Gson().fromJson(req.body(), HashMap.class);
+        String gameName = null;
+        if (data.get("gameName")!= null){
+            gameName = data.get("gameName").toString();
+        }
+
+        CreateGameRequest createGameRequest = new CreateGameRequest(req.headers("authorization"),gameName);
         try{
             CreateGameResult createGameResult = gameService.createGame(createGameRequest);
             res.status(200);
@@ -39,10 +47,17 @@ public class GameHandler {
     }
 
     public Object joinGame(Request req, Response res) throws ResponseException{
-        int gameID = Integer.parseInt(req.params("gameID"));
-        String playerColor = req.params("playerColor");
-        JoinGameRequest joinGameRequest = new JoinGameRequest(req.headers("authorization"),playerColor,gameID);
         try{
+            var data = new Gson().fromJson(req.body(), HashMap.class);
+            String playerColor = null;
+            int gameID = 0;
+            if (data.get("playerColor") != null){
+                playerColor = data.get("playerColor").toString();}
+            if (data.get("gameID") != null){
+                double num = Double.parseDouble(data.get("gameID").toString());
+                gameID = (int) num;}
+            JoinGameRequest joinGameRequest = new JoinGameRequest(req.headers("authorization"),playerColor,gameID);
+
             gameService.joinGame(joinGameRequest);
             res.status(200);
             return "{}";

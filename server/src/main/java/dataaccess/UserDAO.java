@@ -15,8 +15,6 @@ public class UserDAO implements UserDataAccess{
         return users.get(username);
     }
     public void deleteUserData(){
-        for (String key :users.keySet()){
-            users.remove(key);
-        }
+        users.clear();
     }
 }

@@ -20,8 +20,6 @@ public class AuthDAO implements AuthDataAccess{
     }
 
     public void deleteAuthData(){
-        for (String key :auths.keySet()){
-            auths.remove(key);
-        }
+        auths.clear();
     }
 }

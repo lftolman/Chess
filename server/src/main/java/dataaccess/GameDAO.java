@@ -24,9 +24,7 @@ public class GameDAO implements GameDataAccess{
     }
 
     public void deleteGames(){
-        for (int key :games.keySet()){
-            games.remove(key);
-        }
+        games.clear();
     }
 
 }

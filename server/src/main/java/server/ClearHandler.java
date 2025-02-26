@@ -14,9 +14,8 @@ public class ClearHandler {
     }
 
     public Object clearApplication(Request req, Response res) throws ResponseException{
-        ClearAppRequest clearAppRequest = new Gson().fromJson(req.body(), ClearAppRequest.class);
         try{
-            clearService.clearApplication(clearAppRequest);
+            clearService.clearApplication(new ClearAppRequest());
             res.status(200);
             return "{}";
 

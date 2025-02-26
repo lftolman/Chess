@@ -41,7 +41,7 @@ public class UserService {
         try{
             UserData userData = userDAO.getUser(loginRequest.username());
             if (userData == null){
-                throw new ResponseException(500,"Error: Username doesn't exist");
+                throw new ResponseException(401,"Error: Username doesn't exist");
             }
             if (!Objects.equals(userData.password(), loginRequest.password())){
                 throw new ResponseException(401,"Error: unauthorized");

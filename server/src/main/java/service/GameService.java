@@ -13,7 +13,7 @@ import java.util.UUID;
 public class GameService {
     private GameDataAccess gameDAO;
     private AuthDataAccess authDAO;
-    private int gameID = 1;
+    private int gameID = 0;
 
 
     public GameService(GameDataAccess DAO, AuthDataAccess aDAO){
@@ -46,6 +46,7 @@ public class GameService {
             throw new ResponseException(401, "Error: bad request");
         }
         try {
+            gameID ++;
             String authToken = createGameRequest.authToken();
             if (authDAO.getAuth(authToken) == null){
                 throw new ResponseException(401,"Error: unauthorized");
@@ -53,8 +54,7 @@ public class GameService {
 
             GameData gameData = new GameData(gameID, null,null, createGameRequest.gameName(), new ChessGame());
             gameDAO.createGame(gameData);
-            gameID ++;
-            return new CreateGameResult(gameID -1);
+            return new CreateGameResult(gameID);
         } catch (DataAccessException e) {
             throw new ResponseException(500, "Error: "+ e.getMessage());
         }
@@ -63,6 +63,9 @@ public class GameService {
 
     public void joinGame(JoinGameRequest joinGameRequest) throws ResponseException {
         try{
+            if ((joinGameRequest.playerColor() == null )|| (gameID == 0)||((!joinGameRequest.playerColor().equals("WHITE")&&!joinGameRequest.playerColor().equals("BLACK")))){
+                throw new ResponseException(400,"Error: bad request");
+            }
             GameData gameData = gameDAO.getGame(joinGameRequest.gameID());
             AuthData authData = authDAO.getAuth(joinGameRequest.authToken());
             if (authData == null){
@@ -70,12 +73,11 @@ public class GameService {
             }
             if (gameData == null){
                 throw new ResponseException(400,"Error: bad request");
-            }
-            if ((gameData.whiteUsername() == null)&& Objects.equals(joinGameRequest.playerColor(), "white")){
+            }if ((gameData.whiteUsername() == null)&& Objects.equals(joinGameRequest.playerColor(), "WHITE")){
                 GameData newData = new GameData(gameID,authData.username(),gameData.blackUsername(), gameData.gameName(), gameData.game());
                 gameDAO.updateGame(joinGameRequest.gameID(),newData);
             }
-            else if ((gameData.blackUsername() == null)&& Objects.equals(joinGameRequest.playerColor(), "black")){
+            else if ((gameData.blackUsername() == null)&& Objects.equals(joinGameRequest.playerColor(), "BLACK")){
                 GameData newData = new GameData(gameID,gameData.whiteUsername(),authData.username(), gameData.gameName(), gameData.game());
                 gameDAO.updateGame(joinGameRequest.gameID(),newData);
             }
