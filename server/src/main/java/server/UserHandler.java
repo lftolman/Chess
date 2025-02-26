@@ -38,7 +38,7 @@ public class UserHandler {
     }
 
     public Object logout(Request req, Response res) throws ResponseException {
-        LogoutRequest logoutRequest = new Gson().fromJson(req.body(),LogoutRequest.class);
+        LogoutRequest logoutRequest = new LogoutRequest(req.headers("authorization"));
         try{
             userService.logout(logoutRequest);
             res.status(200);

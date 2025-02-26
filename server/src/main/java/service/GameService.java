@@ -6,6 +6,7 @@ import dataaccess.GameDataAccess;
 import exception.ResponseException;
 import model.*;
 
+import java.util.Objects;
 import java.util.UUID;
 
 
@@ -70,11 +71,11 @@ public class GameService {
             if (gameData == null){
                 throw new ResponseException(400,"Error: bad request");
             }
-            if ((gameData.whiteUsername() == null)&& joinGameRequest.playerColor()== ChessGame.TeamColor.WHITE){
+            if ((gameData.whiteUsername() == null)&& Objects.equals(joinGameRequest.playerColor(), "white")){
                 GameData newData = new GameData(gameID,authData.username(),gameData.blackUsername(), gameData.gameName(), gameData.game());
                 gameDAO.updateGame(joinGameRequest.gameID(),newData);
             }
-            else if ((gameData.blackUsername() == null)&& joinGameRequest.playerColor()== ChessGame.TeamColor.BLACK){
+            else if ((gameData.blackUsername() == null)&& Objects.equals(joinGameRequest.playerColor(), "black")){
                 GameData newData = new GameData(gameID,gameData.whiteUsername(),authData.username(), gameData.gameName(), gameData.game());
                 gameDAO.updateGame(joinGameRequest.gameID(),newData);
             }

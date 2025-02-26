@@ -15,7 +15,7 @@ public class GameHandler {
     }
 
     public Object listGames(Request req, Response res) throws ResponseException {
-        ListGamesRequest listGamesRequest = new Gson().fromJson(req.body(), ListGamesRequest.class);
+        ListGamesRequest listGamesRequest = new ListGamesRequest(req.headers("authorization"));
         try {
             ListGamesResult listGamesResult = gameService.listGames(listGamesRequest);
             res.status(200);
@@ -27,7 +27,7 @@ public class GameHandler {
     }
 
     public Object createGame(Request req, Response res) throws ResponseException{
-        CreateGameRequest createGameRequest = new Gson().fromJson(req.body(),CreateGameRequest.class);
+        CreateGameRequest createGameRequest = new CreateGameRequest(req.headers("authorization"),req.body());
         try{
             CreateGameResult createGameResult = gameService.createGame(createGameRequest);
             res.status(200);
@@ -39,12 +39,15 @@ public class GameHandler {
     }
 
     public Object joinGame(Request req, Response res) throws ResponseException{
-        JoinGameRequest joinGameRequest = new Gson().fromJson(req.body(),JoinGameRequest.class);
+        int gameID = Integer.parseInt(req.params("gameID"));
+        String playerColor = req.params("playerColor");
+        JoinGameRequest joinGameRequest = new JoinGameRequest(req.headers("authorization"),playerColor,gameID);
         try{
             gameService.joinGame(joinGameRequest);
             res.status(200);
             return "{}";
         } catch (ResponseException e){
+            res.status(e.StatusCode());
             throw e;
         }
     }
