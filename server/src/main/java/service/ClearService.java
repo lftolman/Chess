@@ -23,7 +23,7 @@ public class ClearService {
             authDAO.deleteAuthData();
             gameDAO.deleteGames();
         } catch (DataAccessException e) {
-            throw new ResponseException(500,"Error: %e");
+            throw new ResponseException(500,"Error: "+ e.getMessage());
         }
     }
 

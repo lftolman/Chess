@@ -24,30 +24,38 @@ public class GameService {
         return UUID.randomUUID().toString();
     }
 
-    public ListGamesResult listGames(ListGamesRequest listGamesRequest) throws DataAccessException {
-        String authToken = listGamesRequest.authToken();
-        if (authDAO.getAuth(authToken) == null){
-            throw new DataAccessException("Error: unauthorized");
+    public ListGamesResult listGames(ListGamesRequest listGamesRequest) throws ResponseException {
+        if (listGamesRequest.authToken() == null){
+            throw new ResponseException(400, "Error: bad request");
         }
         try {
+            String authToken = listGamesRequest.authToken();
+            if (authDAO.getAuth(authToken) == null){
+                throw new ResponseException(401,"Error: unauthorized");
+            }
+
             return new ListGamesResult(gameDAO.listGames());
         }catch (DataAccessException e) {
-            throw new RuntimeException("Error: %e");
+            throw new ResponseException(500,"Error: "+ e.getMessage());
         }
     }
 
-    public CreateGameResult createGame(CreateGameRequest createGameRequest) throws DataAccessException {
-        String authToken = createGameRequest.authToken();
-        if (authDAO.getAuth(authToken) == null){
-            throw new DataAccessException("Error: unauthorized");
+    public CreateGameResult createGame(CreateGameRequest createGameRequest) throws ResponseException {
+        if (createGameRequest.gameName() == null || createGameRequest.authToken()==null){
+            throw new ResponseException(401, "Error: bad request");
         }
         try {
+            String authToken = createGameRequest.authToken();
+            if (authDAO.getAuth(authToken) == null){
+                throw new ResponseException(401,"Error: unauthorized");
+            }
+
             GameData gameData = new GameData(gameID, null,null, createGameRequest.gameName(), new ChessGame());
             gameDAO.createGame(gameData);
             gameID ++;
             return new CreateGameResult(gameID -1);
         } catch (DataAccessException e) {
-            throw new RuntimeException("Error: %e");
+            throw new ResponseException(500, "Error: "+ e.getMessage());
         }
 
     }
@@ -74,7 +82,7 @@ public class GameService {
                 throw new ResponseException(403,"Error: already taken");
             }
         }catch (DataAccessException e){
-            throw new ResponseException(500,"Error: &e");
+            throw new ResponseException(500,"Error: "+e.getMessage());
         }
     }
 }

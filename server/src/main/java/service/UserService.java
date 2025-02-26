@@ -33,7 +33,7 @@ public class UserService {
             authDAO.createAuth(newAuth);
             return new RegisterResult(registerRequest.username(), newToken);
         } catch (DataAccessException e){
-            throw new ResponseException(500,"Error: %e");
+            throw new ResponseException(500,"Error: "+ e.getMessage());
         }
     }
 
@@ -51,7 +51,7 @@ public class UserService {
             authDAO.createAuth(newAuth);
             return new LoginResult(loginRequest.username(), newToken);
         } catch (DataAccessException e){
-            throw new ResponseException(500,"Error: %e");
+            throw new ResponseException(500,"Error: "+e.getMessage());
         }
     }
 
@@ -63,7 +63,7 @@ public class UserService {
             }
             authDAO.deleteAuth(authData.authToken());
         } catch (DataAccessException e){
-            throw new ResponseException(500,"Error: %e");
+            throw new ResponseException(500,"Error: "+e.getMessage());
         }
     }
 }
