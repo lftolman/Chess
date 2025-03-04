@@ -12,10 +12,10 @@ public class ClearService {
     private UserDataAccess userDataAccess;
 
 
-    public ClearService(GameDataAccess DAO, AuthDataAccess aDAO, UserDataAccess uDAO){
-        this.gameDataAccess = DAO;
-        this.authDataAccess = aDAO;
-        this.userDataAccess = uDAO;
+    public ClearService(GameDataAccess gameDataAccess, AuthDataAccess authDataAccess, UserDataAccess userDataAccess){
+        this.gameDataAccess = gameDataAccess;
+        this.authDataAccess = authDataAccess;
+        this.userDataAccess = userDataAccess;
     }
     public void clearApplication(ClearAppRequest clearAppRequest) throws ResponseException {
         try {

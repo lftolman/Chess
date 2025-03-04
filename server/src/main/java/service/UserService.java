@@ -9,9 +9,9 @@ import java.util.UUID;
 public class UserService {
     private UserDataAccess userDataAccess;
     private AuthDataAccess authDataAccess;
-    public UserService(UserDataAccess DAO, AuthDataAccess aDAO){
-        this.userDataAccess = DAO;
-        this.authDataAccess = aDAO;
+    public UserService(UserDataAccess userDataAccess, AuthDataAccess authDataAccess){
+        this.userDataAccess = userDataAccess;
+        this.authDataAccess = authDataAccess;
     }
     public static String generateToken() {
         return UUID.randomUUID().toString();

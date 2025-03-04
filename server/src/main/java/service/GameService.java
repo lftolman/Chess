@@ -16,9 +16,9 @@ public class GameService {
     private int gameID = 0;
 
 
-    public GameService(GameDataAccess DAO, AuthDataAccess aDAO){
-        this.gameDataAccess = DAO;
-        this.authDataAccess = aDAO;
+    public GameService(GameDataAccess gameDataAccess, AuthDataAccess authDataAccess){
+        this.gameDataAccess = gameDataAccess;
+        this.authDataAccess = authDataAccess;
     }
 
     public static String generateToken() {
@@ -63,7 +63,8 @@ public class GameService {
 
     public void joinGame(JoinGameRequest joinGameRequest) throws ResponseException {
         try{
-            if ((joinGameRequest.playerColor() == null )|| (gameID == 0)||((!joinGameRequest.playerColor().equals("WHITE")&&!joinGameRequest.playerColor().equals("BLACK")))){
+            if ((joinGameRequest.playerColor()==null)||(gameID == 0)||((!joinGameRequest.playerColor().equals("WHITE")
+                    &&!joinGameRequest.playerColor().equals("BLACK")))){
                 throw new ResponseException(400,"Error: bad request");
             }
             GameData gameData = gameDataAccess.getGame(joinGameRequest.gameID());
