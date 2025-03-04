@@ -23,7 +23,7 @@ public class GameHandler {
             res.status(200);
             return new Gson().toJson(listGamesResult);
         } catch (ResponseException e) {
-            res.status(e.StatusCode());
+            res.status(e.statusCode());
             throw e;
         }
     }
@@ -41,7 +41,7 @@ public class GameHandler {
             res.status(200);
             return new Gson().toJson(createGameResult);
         }catch (ResponseException e){
-            res.status(e.StatusCode());
+            res.status(e.statusCode());
             throw e;
         }
     }
@@ -62,7 +62,7 @@ public class GameHandler {
             res.status(200);
             return "{}";
         } catch (ResponseException e){
-            res.status(e.StatusCode());
+            res.status(e.statusCode());
             throw e;
         }
     }

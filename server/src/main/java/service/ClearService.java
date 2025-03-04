@@ -7,21 +7,21 @@ import exception.ResponseException;
 import model.*;
 
 public class ClearService {
-    private GameDataAccess gameDAO;
-    private AuthDataAccess authDAO;
-    private UserDataAccess userDAO;
+    private GameDataAccess gameDataAccess;
+    private AuthDataAccess authDataAccess;
+    private UserDataAccess userDataAccess;
 
 
     public ClearService(GameDataAccess DAO, AuthDataAccess aDAO, UserDataAccess uDAO){
-        this.gameDAO = DAO;
-        this.authDAO = aDAO;
-        this.userDAO = uDAO;
+        this.gameDataAccess = DAO;
+        this.authDataAccess = aDAO;
+        this.userDataAccess = uDAO;
     }
     public void clearApplication(ClearAppRequest clearAppRequest) throws ResponseException {
         try {
-            userDAO.deleteUserData();
-            authDAO.deleteAuthData();
-            gameDAO.deleteGames();
+            userDataAccess.deleteUserData();
+            authDataAccess.deleteAuthData();
+            gameDataAccess.deleteGames();
         } catch (DataAccessException e) {
             throw new ResponseException(500,"Error: "+ e.getMessage());
         }

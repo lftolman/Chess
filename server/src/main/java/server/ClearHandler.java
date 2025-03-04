@@ -20,7 +20,7 @@ public class ClearHandler {
             return "{}";
 
         } catch (ResponseException e){
-            res.status(e.StatusCode());
+            res.status(e.statusCode());
             throw e;
         }
     }

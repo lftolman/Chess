@@ -7,11 +7,11 @@ import java.util.Objects;
 import java.util.UUID;
 
 public class UserService {
-    private UserDataAccess userDAO;
-    private AuthDataAccess authDAO;
+    private UserDataAccess userDataAccess;
+    private AuthDataAccess authDataAccess;
     public UserService(UserDataAccess DAO, AuthDataAccess aDAO){
-        this.userDAO = DAO;
-        this.authDAO = aDAO;
+        this.userDataAccess = DAO;
+        this.authDataAccess = aDAO;
     }
     public static String generateToken() {
         return UUID.randomUUID().toString();
@@ -22,15 +22,15 @@ public class UserService {
             if ((registerRequest.username() == null)||(registerRequest.email()==null)||(registerRequest.password()==null)){
                 throw new ResponseException(400,"Error: bad request");
             }
-            UserData userData = userDAO.getUser(registerRequest.username());
+            UserData userData = userDataAccess.getUser(registerRequest.username());
             if (userData != null){
                 throw new ResponseException(403, "Error: already taken");
             }
             UserData newData = new UserData(registerRequest.username(), registerRequest.password(), registerRequest.email());
-            userDAO.insertUser(newData);
+            userDataAccess.insertUser(newData);
             String newToken = generateToken();
             AuthData newAuth = new AuthData(newToken, registerRequest.username());
-            authDAO.createAuth(newAuth);
+            authDataAccess.createAuth(newAuth);
             return new RegisterResult(registerRequest.username(), newToken);
         } catch (DataAccessException e){
             throw new ResponseException(500,"Error: "+ e.getMessage());
@@ -39,7 +39,7 @@ public class UserService {
 
     public LoginResult login(LoginRequest loginRequest) throws ResponseException {
         try{
-            UserData userData = userDAO.getUser(loginRequest.username());
+            UserData userData = userDataAccess.getUser(loginRequest.username());
             if (userData == null){
                 throw new ResponseException(401,"Error: Username doesn't exist");
             }
@@ -48,7 +48,7 @@ public class UserService {
             }
             String newToken = generateToken();
             AuthData newAuth = new AuthData(newToken, loginRequest.username());
-            authDAO.createAuth(newAuth);
+            authDataAccess.createAuth(newAuth);
             return new LoginResult(loginRequest.username(), newToken);
         } catch (DataAccessException e){
             throw new ResponseException(500,"Error: "+e.getMessage());
@@ -57,11 +57,11 @@ public class UserService {
 
     public void logout(LogoutRequest logoutRequest) throws ResponseException {
         try{
-            AuthData authData = authDAO.getAuth(logoutRequest.authToken());
+            AuthData authData = authDataAccess.getAuth(logoutRequest.authToken());
             if (authData == null){
                 throw new ResponseException(401,"Error: unauthorized");
             }
-            authDAO.deleteAuth(authData.authToken());
+            authDataAccess.deleteAuth(authData.authToken());
         } catch (DataAccessException e){
             throw new ResponseException(500,"Error: "+e.getMessage());
         }

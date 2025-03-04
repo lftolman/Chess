@@ -19,7 +19,7 @@ public class UserHandler {
             res.status(200);
             return new Gson().toJson(registerResult);
         } catch (ResponseException e){
-            res.status(e.StatusCode());
+            res.status(e.statusCode());
             throw e;
         }
     }
@@ -32,7 +32,7 @@ public class UserHandler {
             return new Gson().toJson(loginResult);
 
         } catch (ResponseException e){
-            res.status(e.StatusCode());
+            res.status(e.statusCode());
             throw e;
         }
     }
@@ -45,7 +45,7 @@ public class UserHandler {
             return  "{}";
 
         } catch (ResponseException e){
-            res.status(e.StatusCode());
+            res.status(e.statusCode());
             throw e;
         }
     }
