@@ -2,6 +2,7 @@ package service;
 import dataaccess.*;
 import exception.ResponseException;
 import model.*;
+import org.mindrot.jbcrypt.BCrypt;
 
 import java.util.Objects;
 import java.util.UUID;
@@ -26,7 +27,8 @@ public class UserService {
             if (userData != null){
                 throw new ResponseException(403, "Error: already taken");
             }
-            UserData newData = new UserData(registerRequest.username(), registerRequest.password(), registerRequest.email());
+            String hashedPassword = BCrypt.hashpw(registerRequest.password(), BCrypt.gensalt());
+            UserData newData = new UserData(registerRequest.username(), hashedPassword, registerRequest.email());
             userDataAccess.insertUser(newData);
             String newToken = generateToken();
             AuthData newAuth = new AuthData(newToken, registerRequest.username());
@@ -43,7 +45,7 @@ public class UserService {
             if (userData == null){
                 throw new ResponseException(401,"Error: Username doesn't exist");
             }
-            if (!Objects.equals(userData.password(), loginRequest.password())){
+            if (!BCrypt.checkpw(loginRequest.password(),userData.password())){
                 throw new ResponseException(401,"Error: unauthorized");
             }
             String newToken = generateToken();
@@ -66,4 +68,7 @@ public class UserService {
             throw new ResponseException(500,"Error: "+e.getMessage());
         }
     }
+
+
+
 }

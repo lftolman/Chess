@@ -14,13 +14,16 @@ public class Server {
     private ClearHandler clearHandler;
 
     public Server(){
-        UserDataAccess userDAO = new UserDAO();
-        GameDataAccess gameDAO = new GameDAO();
-        AuthDataAccess authDAO = new AuthDAO();
-
-        userService = new UserService(userDAO,authDAO);
-        gameService = new GameService(gameDAO,authDAO);
-        clearService = new ClearService(gameDAO,authDAO,userDAO);
+        try {
+            UserDataAccess userDAO = new MySQLUserDAO();
+            GameDataAccess gameDAO = new MySQLGameDAO();
+            AuthDataAccess authDAO = new MySQLAuthDAO();
+            userService = new UserService(userDAO,authDAO);
+            gameService = new GameService(gameDAO,authDAO);
+            clearService = new ClearService(gameDAO,authDAO,userDAO);
+        } catch (ResponseException | DataAccessException e) {
+            throw new RuntimeException(e);
+        }
 
         userHandler = new UserHandler(userService);
         clearHandler = new ClearHandler(clearService);
