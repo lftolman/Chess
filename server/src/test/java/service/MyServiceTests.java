@@ -8,7 +8,7 @@ import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.*;
 
-public class MyTests {
+public class MyServiceTests {
     private static GameDataAccess gameDAO;
     private static UserDataAccess userDAO;
 
@@ -20,13 +20,17 @@ public class MyTests {
 
     @BeforeAll
     public static void init(){
-        gameDAO = new GameDAO();
-        AuthDataAccess authDAO = new AuthDAO();
-        userDAO = new UserDAO();
+        try {
+            gameDAO = new MySQLGameDAO();
+            AuthDataAccess authDAO = new MySQLAuthDAO();
+            userDAO = new MySQLUserDAO();
 
-        gameService = new GameService(gameDAO, authDAO);
-        userService = new UserService(userDAO, authDAO);
-        clearService = new ClearService(gameDAO, authDAO,userDAO);
+            gameService = new GameService(gameDAO, authDAO);
+            userService = new UserService(userDAO, authDAO);
+            clearService = new ClearService(gameDAO, authDAO, userDAO);
+        } catch (Exception e) {
+            fail("Setup failed du.e to unexpected Exception: " + e.getMessage());
+        }
 
     }
 

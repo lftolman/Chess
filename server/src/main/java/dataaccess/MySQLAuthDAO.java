@@ -22,7 +22,7 @@ public class MySQLAuthDAO extends MySQLDataAccess implements AuthDataAccess{
                 ps.executeUpdate();
             }
         } catch (SQLException e){
-            throw new DataAccessException(e.getMessage());
+            throw new DataAccessException("SQLException: "+ e.getMessage());
         }
     };
 
@@ -35,12 +35,14 @@ public class MySQLAuthDAO extends MySQLDataAccess implements AuthDataAccess{
                     if (rs.next()) {
                         return new AuthData(authToken, rs.getString("username"));
                     }
+                    else{
+                        return null;
+                    }
                 }
             }
         } catch (Exception e) {
             throw new DataAccessException(String.format("Unable to read data: %s", e.getMessage()));
         }
-        return null;
     };
 
     public void deleteAuth(String authToken) throws DataAccessException{
