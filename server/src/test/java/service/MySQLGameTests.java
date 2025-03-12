@@ -10,6 +10,9 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
 
+import java.util.ArrayList;
+import java.util.Collection;
+
 import static org.junit.jupiter.api.Assertions.*;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -56,5 +59,50 @@ public class MySQLGameTests {
         String message = e.getMessage();
         assertTrue(message.contains("SQLException"));
     }
+
+    @Test
+    @Order(3)
+    void testGetGamePositive(){
+        try {
+            GameData gameData = gameDAO.getGame(1);
+            GameData expected = new GameData(1,"whiteUsername","blackUsername","gameName",new ChessGame());
+            assertEquals(expected.toString(),gameData.toString());
+        } catch (Exception e){
+            fail("Test failed due to unexpected Exception: " + e.getMessage());
+        }
+    }
+
+    @Test
+    @Order(4)
+    void testGetGameNegative(){
+        try {
+            GameData gameData = gameDAO.getGame(3);
+            assertNull(gameData);
+        } catch (Exception e){
+            fail("Test failed due to unexpected Exception: " + e.getMessage());
+        }
+    }
+
+
+    @Test
+    @Order(5)
+    void testListGames(){
+        try{
+            GameData game1 = new GameData(1,"whiteUsername","blackUsername","gameName",new ChessGame());
+            GameData game2 = new GameData(2,"whiteUsername2","blackUsername2","gameName2",new ChessGame());
+            gameDAO.createGame(game2);
+
+            Collection<GameData> games = gameDAO.listGames();
+            Collection<GameData> expected = new ArrayList<>();
+            expected.add(game1);
+            expected.add(game2);
+
+            assertEquals(expected,games);
+        } catch (Exception e) {
+            fail("Test failed due to unexpected Exception: " + e.getMessage());
+        }
+    }
+
+
 
 }
