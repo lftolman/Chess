@@ -1,9 +1,6 @@
-package service;
+package dataaccess;
 
-import dataaccess.*;
-import exception.ResponseException;
 import model.UserData;
-import org.eclipse.jetty.server.Authentication;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Order;
