@@ -3,7 +3,7 @@ package service;
 import chess.ChessGame;
 import dataaccess.*;
 import exception.ResponseException;
-import model.AuthData;
+
 import model.GameData;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
@@ -32,7 +32,7 @@ public class MySQLGameTests {
     public void setUp(){
         try{
             gameDAO.deleteGames();
-            GameData game = new GameData(1,"whiteUsername","blackUsername","gameName",new ChessGame());
+            GameData game = new GameData(1,null,"blackUsername","gameName",new ChessGame());
             gameDAO.createGame(game);
         } catch (DataAccessException e) {
             fail("Setup failed due to unexpected Exception: " + e.getMessage());
@@ -45,7 +45,7 @@ public class MySQLGameTests {
         try{
             GameData game = new GameData(2,"whiteUsername2","blackUsername2","gameName2",new ChessGame());
             gameDAO.createGame(game);
-            assertNotNull(gameDAO.getGame(2), "Auth Token not added");
+            assertNotNull(gameDAO.getGame(2), "Game Data not added");
         } catch (Exception e) {
             fail("Test failed due to unexpected Exception: " + e.getMessage());
         }
@@ -57,7 +57,7 @@ public class MySQLGameTests {
         GameData game = new GameData(1,"whiteUsername","blackUsername","gameName",new ChessGame());
         Exception e = assertThrows(DataAccessException.class, () -> gameDAO.createGame(game));
         String message = e.getMessage();
-        assertTrue(message.contains("SQLException"));
+        assertTrue(message.contains("Duplicate"));
     }
 
     @Test
@@ -65,7 +65,7 @@ public class MySQLGameTests {
     void testGetGamePositive(){
         try {
             GameData gameData = gameDAO.getGame(1);
-            GameData expected = new GameData(1,"whiteUsername","blackUsername","gameName",new ChessGame());
+            GameData expected = new GameData(1,null,"blackUsername","gameName",new ChessGame());
             assertEquals(expected.toString(),gameData.toString());
         } catch (Exception e){
             fail("Test failed due to unexpected Exception: " + e.getMessage());
@@ -86,9 +86,9 @@ public class MySQLGameTests {
 
     @Test
     @Order(5)
-    void testListGames(){
+    void testListGamesPositive(){
         try{
-            GameData game1 = new GameData(1,"whiteUsername","blackUsername","gameName",new ChessGame());
+            GameData game1 = new GameData(1,null,"blackUsername","gameName",new ChessGame());
             GameData game2 = new GameData(2,"whiteUsername2","blackUsername2","gameName2",new ChessGame());
             gameDAO.createGame(game2);
 
@@ -103,6 +103,44 @@ public class MySQLGameTests {
         }
     }
 
+
     @Test
+    @Order(6)
+    void testUpdateGamePositive(){
+        try {
+            GameData newGame = new GameData(1, "whiteUsername", "blackUsername", "gameName", new ChessGame());
+            gameDAO.updateGame(1, newGame);
+            GameData game = gameDAO.getGame(1);
+            assertEquals(newGame,game);
+        } catch (DataAccessException e) {
+            fail("Test failed due to unexpected Exception: " + e.getMessage());
+        }
+
+    }
+
+    @Test
+    @Order(7)
+    void testUpdateGameNegative(){
+        try {
+            Collection<GameData> games = gameDAO.listGames();
+            GameData newGame = new GameData(3, "whiteUsername", "blackUsername", "gameName", new ChessGame());
+            gameDAO.updateGame(3, newGame);
+            Collection<GameData> updatedGames = gameDAO.listGames();
+            assertEquals(games,updatedGames);
+        } catch (DataAccessException e) {
+            fail("Test failed due to unexpected Exception: " + e.getMessage());
+        }
+    }
+
+    @Test
+    @Order(8)
+    void testDeleteGames(){
+        try{
+            gameDAO.deleteGames();
+            assertEquals(new ArrayList<GameData>(),gameDAO.listGames());
+        } catch (Exception e) {
+            fail("Test failed due to unexpected Exception: " + e.getMessage());
+        }
+    }
 
 }
