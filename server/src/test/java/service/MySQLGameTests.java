@@ -103,6 +103,16 @@ public class MySQLGameTests {
         }
     }
 
+    @Test
+    void testListGamesNegative(){
+        try{
+            gameDAO.deleteGames();
+            assertEquals(new ArrayList<GameData>(),gameDAO.listGames());
+        } catch (Exception e) {
+            fail("Test failed due to unexpected Exception: " + e.getMessage());
+        }
+    }
+
 
     @Test
     @Order(6)
@@ -136,8 +146,7 @@ public class MySQLGameTests {
     @Order(8)
     void testDeleteGames(){
         try{
-            gameDAO.deleteGames();
-            assertEquals(new ArrayList<GameData>(),gameDAO.listGames());
+            assertDoesNotThrow(()->gameDAO.deleteGames());
         } catch (Exception e) {
             fail("Test failed due to unexpected Exception: " + e.getMessage());
         }
