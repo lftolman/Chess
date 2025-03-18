@@ -2,6 +2,7 @@ package ui;
 
 import java.io.PrintStream;
 import java.nio.charset.StandardCharsets;
+import java.util.Objects;
 import java.util.Random;
 
 
@@ -11,9 +12,17 @@ import static ui.EscapeSequences.BLACK_KING;
 public class ChessBoard {
     private static String[] whitePieces = {WHITE_ROOK,WHITE_KNIGHT,WHITE_BISHOP,WHITE_QUEEN,WHITE_KING,
             WHITE_BISHOP, WHITE_KNIGHT,WHITE_ROOK};
+    private static String[] whiteReversed = {WHITE_ROOK,WHITE_KNIGHT,WHITE_BISHOP,WHITE_KING,WHITE_QUEEN,
+            WHITE_BISHOP, WHITE_KNIGHT,WHITE_ROOK};
+    private static String[] whitePawns = {WHITE_PAWN, WHITE_PAWN,WHITE_PAWN,WHITE_PAWN,WHITE_PAWN,WHITE_PAWN,
+            WHITE_PAWN,WHITE_PAWN};
     private static String[] blackPieces = {BLACK_ROOK,BLACK_KNIGHT,BLACK_BISHOP,BLACK_QUEEN,BLACK_KING,
             BLACK_BISHOP, BLACK_KNIGHT,BLACK_ROOK};
-    private String color = "WHITE";
+    private static String[] blackReversed= {BLACK_ROOK,BLACK_KNIGHT,BLACK_BISHOP,BLACK_KING,BLACK_QUEEN,
+            BLACK_BISHOP, BLACK_KNIGHT,BLACK_ROOK};
+    private static String[] blackPawns = {BLACK_PAWN,BLACK_PAWN,BLACK_PAWN,BLACK_PAWN,BLACK_PAWN,BLACK_PAWN,
+            BLACK_PAWN,BLACK_PAWN};
+    private static String color = "WHITE";
 
 
     private static final int boardSize = 8;
@@ -24,7 +33,6 @@ public class ChessBoard {
 
         out.print(ERASE_SCREEN);
 
-        drawHeaders(out);
 
         drawTicTacToeBoard(out);
 
@@ -34,13 +42,9 @@ public class ChessBoard {
 
     }
 
-    public static void drawHeaders(PrintStream out){
-        String[] headers = {"   a ", " b ", " c ", " d ", " e ", " f ", " g ", " h "};
+    public static void drawHeaders(PrintStream out, String[] headers){
         for (int boardCol = 0; boardCol < boardSize; ++boardCol){
-            drawHeader(out, headers[boardCol]);
-
-//            out.print(EMPTY.repeat(lineWidth));
-        }
+            drawHeader(out, headers[boardCol]);}
         out.println();
     }
 
@@ -63,32 +67,41 @@ public class ChessBoard {
     }
 
     private static void drawTicTacToeBoard(PrintStream out) {
-        printHeaderText(out,"1 ");
-        drawRowOne(out, whitePieces, 0, SET_TEXT_COLOR_WHITE);
-        printHeaderText(out," 1");
-        out.println();
-        printHeaderText(out,"2 ");
-        drawRowTwo(out,WHITE_PAWN,1,SET_TEXT_COLOR_WHITE);
-        printHeaderText(out," 2");
-        out.println();
-        for (int i = 0; i<4;i++){
-            printHeaderText(out,String.valueOf(i+3)+" ");
-            drawMiddle(out,(i+1)%2 );
-            printHeaderText(out," "+ String.valueOf(i+3));
-            out.println();
+        if (Objects.equals(color, "WHITE")){
+            String[] headers = {"   a ", " b ", " c ", " d ", " e ", " f ", " g ", " h "};
+            drawHeaders(out,headers);
+            drawRow(out, blackPieces, 0, SET_TEXT_COLOR_BLACK, 8);
+            drawRow(out, blackPawns, 1, SET_BG_COLOR_BLACK, 7);
+            for (int i = 0; i<4;i++){
+                printHeaderText(out,(6-i)+" ");
+                drawMiddle(out,(i+1)%2 );
+                printHeaderText(out," "+ (6 - i));
+                out.println();
+            }
+            drawRow(out, whitePawns,0,SET_TEXT_COLOR_WHITE,2);
+            drawRow(out, whitePieces,1,SET_TEXT_COLOR_WHITE, 1);
+            drawHeaders(out,headers);}
+        else{
+            String[] headers = {"   h ", " g ", " f ", " e ", " d ", " c ", " b ", " a "};
+            drawHeaders(out,headers);
+            drawRow(out, whiteReversed,0,SET_TEXT_COLOR_WHITE, 1);
+            drawRow(out, whitePawns,1,SET_TEXT_COLOR_WHITE, 2);
+            for (int i = 0; i<4;i++){
+                printHeaderText(out,(i+3)+" ");
+                drawMiddle(out,(i+1)%2 );
+                printHeaderText(out," "+ (i+3));
+                out.println();
+            }
+            drawRow(out, blackPawns, 0, SET_TEXT_COLOR_BLACK, 7);
+            drawRow(out, blackReversed, 1, SET_TEXT_COLOR_BLACK, 8);
+
+            drawHeaders(out,headers);
         }
-        printHeaderText(out,"7 ");
-        drawRowTwo(out,BLACK_PAWN,0,SET_TEXT_COLOR_BLACK);
-        printHeaderText(out," 7");
-        out.println();
-        printHeaderText(out,"8 ");
-        drawRowOne(out, blackPieces,1,SET_TEXT_COLOR_BLACK);
-        printHeaderText(out," 8");
-        out.println();
-        drawHeaders(out);
+
     }
 
-    private static void drawRowOne(PrintStream out,String[] pieces, int whiteCol, String pieceColor){
+    private static void drawRow(PrintStream out,String[] pieces, int whiteCol, String pieceColor, int row){
+        printHeaderText(out, row +" ");
         for (int squareRow = 0; squareRow < squareSize; squareRow++) {
             for (int boardCol = 0; boardCol < boardSize; ++boardCol) {
                 out.print(pieceColor);
@@ -101,21 +114,8 @@ public class ChessBoard {
                 out.print(pieces[boardCol]);
             }
         }
-    }
-
-    private static void drawRowTwo(PrintStream out,String piece, int whiteCol, String pieceColor){
-        for (int squareRow = 0; squareRow < squareSize; squareRow++) {
-            for (int boardCol = 0; boardCol < boardSize; ++boardCol) {
-                out.print(pieceColor);
-                if ((boardCol+whiteCol) %2 == 0 ){
-                    out.print(SET_BG_COLOR_LIGHT_GREY);
-                }
-                else{
-                    out.print(SET_BG_COLOR_DARK_GREY);
-                }
-                out.print(piece);
-            }
-        }
+        printHeaderText(out," "+row);
+        out.println();
     }
 
     private static void drawMiddle(PrintStream out, int whiteCol) {
