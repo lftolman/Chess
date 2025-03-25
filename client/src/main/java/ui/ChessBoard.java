@@ -11,21 +11,21 @@ import static ui.EscapeSequences.*;
 import static ui.EscapeSequences.BLACK_KING;
 
 public class ChessBoard {
-    private static final String[] whitePieces = {WHITE_ROOK,WHITE_KNIGHT,WHITE_BISHOP,WHITE_QUEEN,WHITE_KING,
+    private static final String[] WHITE_PIECES = {WHITE_ROOK,WHITE_KNIGHT,WHITE_BISHOP,WHITE_QUEEN,WHITE_KING,
             WHITE_BISHOP, WHITE_KNIGHT,WHITE_ROOK};
-    private static final String[] whiteReversed = {WHITE_ROOK,WHITE_KNIGHT,WHITE_BISHOP,WHITE_KING,WHITE_QUEEN,
+    private static final String[] WHITE_REVERSED = {WHITE_ROOK,WHITE_KNIGHT,WHITE_BISHOP,WHITE_KING,WHITE_QUEEN,
             WHITE_BISHOP, WHITE_KNIGHT,WHITE_ROOK};
-    private static final String[] whitePawns = {WHITE_PAWN, WHITE_PAWN,WHITE_PAWN,WHITE_PAWN,WHITE_PAWN,WHITE_PAWN,
+    private static final String[] WHITE_PAWNS = {WHITE_PAWN, WHITE_PAWN,WHITE_PAWN,WHITE_PAWN,WHITE_PAWN,WHITE_PAWN,
             WHITE_PAWN,WHITE_PAWN};
-    private static final String[] blackPieces = {BLACK_ROOK,BLACK_KNIGHT,BLACK_BISHOP,BLACK_QUEEN,BLACK_KING,
+    private static final String[] BLACK_PIECES = {BLACK_ROOK,BLACK_KNIGHT,BLACK_BISHOP,BLACK_QUEEN,BLACK_KING,
             BLACK_BISHOP, BLACK_KNIGHT,BLACK_ROOK};
-    private static final String[] blackReversed= {BLACK_ROOK,BLACK_KNIGHT,BLACK_BISHOP,BLACK_KING,BLACK_QUEEN,
+    private static final String[] BLACK_REVERSED= {BLACK_ROOK,BLACK_KNIGHT,BLACK_BISHOP,BLACK_KING,BLACK_QUEEN,
             BLACK_BISHOP, BLACK_KNIGHT,BLACK_ROOK};
-    private static final String[] blackPawns = {BLACK_PAWN,BLACK_PAWN,BLACK_PAWN,BLACK_PAWN,BLACK_PAWN,BLACK_PAWN,
+    private static final String[] BLACK_PAWNS = {BLACK_PAWN,BLACK_PAWN,BLACK_PAWN,BLACK_PAWN,BLACK_PAWN,BLACK_PAWN,
             BLACK_PAWN,BLACK_PAWN};
 
-    private static final int boardSize = 8;
-    private static final int squareSize = 1;
+    private static final int BOARD_SIZE = 8;
+    private static final int SQUARE_SIZE = 1;
 
     public static void drawBoard(String color, chess.ChessBoard board){
 
@@ -37,18 +37,15 @@ public class ChessBoard {
     }
 
     public static void drawHeaders(PrintStream out, String[] headers){
-        for (int boardCol = 0; boardCol < boardSize; ++boardCol){
+        for (int boardCol = 0; boardCol < BOARD_SIZE; ++boardCol){
             drawHeader(out, headers[boardCol]);}
         out.println();
     }
 
     private static void drawHeader(PrintStream out, String headerText) {
-        int prefixLength = squareSize / 2;
-        int suffixLength = squareSize - prefixLength - 1;
-
+        int prefixLength = SQUARE_SIZE / 2;
         out.print(EMPTY.repeat(prefixLength));
         printHeaderText(out, headerText);
-        out.print(EMPTY.repeat(suffixLength));
     }
 
     private static void printHeaderText(PrintStream out, String player) {
@@ -62,30 +59,30 @@ public class ChessBoard {
         if (Objects.equals(color, "WHITE")){
             String[] headers = {"    a ", " b ", " c ", " d ", " e ", " f ", " g ", " h "};
             drawHeaders(out,headers);
-            drawRow(out, blackPieces, 0, SET_TEXT_COLOR_BLACK, 8);
-            drawRow(out, blackPawns, 1, SET_TEXT_COLOR_BLACK, 7);
+            drawRow(out, BLACK_PIECES, 0, SET_TEXT_COLOR_BLACK, 8);
+            drawRow(out, BLACK_PAWNS, 1, SET_TEXT_COLOR_BLACK, 7);
             for (int i = 0; i<4;i++){
                 printHeaderText(out," "+(6-i)+" ");
                 drawMiddle(out,(i+1)%2 );
                 printHeaderText(out," "+ (6 - i));
                 out.println();
             }
-            drawRow(out, whitePawns,0,SET_TEXT_COLOR_WHITE,2);
-            drawRow(out, whitePieces,1,SET_TEXT_COLOR_WHITE, 1);
+            drawRow(out, WHITE_PAWNS,0,SET_TEXT_COLOR_WHITE,2);
+            drawRow(out, WHITE_PIECES,1,SET_TEXT_COLOR_WHITE, 1);
             drawHeaders(out,headers);}
         else{
             String[] headers = {"    h ", " g ", " f ", " e ", " d ", " c ", " b ", " a "};
             drawHeaders(out,headers);
-            drawRow(out, whiteReversed,0,SET_TEXT_COLOR_WHITE, 1);
-            drawRow(out, whitePawns,1,SET_TEXT_COLOR_WHITE, 2);
+            drawRow(out, WHITE_REVERSED,0,SET_TEXT_COLOR_WHITE, 1);
+            drawRow(out, WHITE_PAWNS,1,SET_TEXT_COLOR_WHITE, 2);
             for (int i = 0; i<4;i++){
                 printHeaderText(out," "+(i+3)+" ");
                 drawMiddle(out,(i+1)%2 );
                 printHeaderText(out," "+ (i+3));
                 out.println();
             }
-            drawRow(out, blackPawns, 0, SET_TEXT_COLOR_BLACK, 7);
-            drawRow(out, blackReversed, 1, SET_TEXT_COLOR_BLACK, 8);
+            drawRow(out, BLACK_PAWNS, 0, SET_TEXT_COLOR_BLACK, 7);
+            drawRow(out, BLACK_REVERSED, 1, SET_TEXT_COLOR_BLACK, 8);
             drawHeaders(out,headers);
         }
 
@@ -93,8 +90,8 @@ public class ChessBoard {
 
     private static void drawRow(PrintStream out,String[] pieces, int whiteCol, String pieceColor, int row){
         printHeaderText(out, " "+row +" ");
-        for (int squareRow = 0; squareRow < squareSize; squareRow++) {
-            for (int boardCol = 0; boardCol < boardSize; ++boardCol) {
+        for (int squareRow = 0; squareRow < SQUARE_SIZE; squareRow++) {
+            for (int boardCol = 0; boardCol < BOARD_SIZE; ++boardCol) {
                 out.print(pieceColor);
                 if ((boardCol+whiteCol) %2 == 0 ){
                     out.print(SET_BG_COLOR_LIGHT_BLUE);
@@ -111,15 +108,15 @@ public class ChessBoard {
 
     private static void drawMiddle(PrintStream out, int whiteCol) {
 
-        for (int squareRow = 0; squareRow < squareSize; squareRow++) {
-            for (int boardCol = 0; boardCol < boardSize; ++boardCol) {
+        for (int squareRow = 0; squareRow < SQUARE_SIZE; squareRow++) {
+            for (int boardCol = 0; boardCol < BOARD_SIZE; ++boardCol) {
                 if ((boardCol + whiteCol) %2 == 1 ){
                     out.print(SET_BG_COLOR_LIGHT_BLUE);
                 }
                 else{
                     out.print(SET_BG_COLOR_PURPLE);
                 }
-                out.print(EMPTY.repeat(squareSize));
+                out.print(EMPTY.repeat(SQUARE_SIZE));
             }
         }
     }
