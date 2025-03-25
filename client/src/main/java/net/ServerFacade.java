@@ -29,9 +29,8 @@ public class ServerFacade {
     }
 
     public void logout() throws ResponseException {
-        LogoutRequest request = new LogoutRequest(authToken);
         var path = "/session";
-        this.makeRequest("DELETE", path, request, null);
+        this.makeRequest("DELETE", path, null, null);
         authToken = null;
 
     }
@@ -42,25 +41,27 @@ public class ServerFacade {
 
     }
 
-    public void join(JoinGameRequest request) throws ResponseException {
+    public void join(int id, String color) throws ResponseException {
+        JoinGameRequest request = new JoinGameRequest(authToken, color,id);
         var path = "/game";
         this.makeRequest("PUT", path, request, null);
 
     }
 
-    public ListGamesResult listGames(ListGamesRequest request) throws ResponseException {
+    public ListGamesResult listGames() throws ResponseException {
         var path = "/game";
-        return this.makeRequest("GET", path, request, ListGamesResult.class);
+        return this.makeRequest("GET", path, null, ListGamesResult.class);
     }
 
-    public CreateGameResult createGame(CreateGameRequest request) throws ResponseException {
+    public CreateGameResult createGame(String gameName) throws ResponseException {
+        CreateGameRequest request = new CreateGameRequest(authToken,gameName);
         var path = "/game";
         return this.makeRequest("POST", path, request, CreateGameResult.class);
     }
 
     public void clearApp(ClearAppRequest request) throws ResponseException {
         var path = "/db";
-        this.makeRequest("DELETE", path, request, null);
+        this.makeRequest("DELETE", path, null, null);
     }
 
 
@@ -71,6 +72,10 @@ public class ServerFacade {
         try {
             URL url = (new URI(serverUrl + path)).toURL();
             HttpURLConnection http = (HttpURLConnection) url.openConnection();
+            if (authToken != null) {
+                http.setRequestProperty("Authorization", authToken);
+            }
+
             http.setRequestMethod(method);
             http.setDoOutput(true);
 
