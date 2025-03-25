@@ -60,7 +60,7 @@ public class Client {
     }
 
     public String register(String[] result)  {
-        if (!this.loggedIn){
+        if (this.loggedIn){
             return SET_TEXT_COLOR_RED + "must be logged out";
         }
         if (result.length != 4){
@@ -69,7 +69,9 @@ public class Client {
         try {
             RegisterRequest request = new RegisterRequest(result[1],result[2], result[3]);
             RegisterResult registerResult = server.register(request);
-            login(result);
+            LoginRequest loginRequest = new LoginRequest(result[1],result[2]);
+            LoginResult loginResult = server.login(loginRequest);
+            loggedIn = true;
             return SET_TEXT_COLOR_GREEN+"register successful for "+registerResult.username()+". you are now logged in.";
         } catch (ResponseException e) {
             return SET_TEXT_COLOR_RED  + "register unsuccessful, " + e.getMessage();
@@ -102,7 +104,7 @@ public class Client {
             viewerID++;
             gameIDs.put(viewerID,createGameResult.gameID());
             games.put(createGameResult.gameID(),new chess.ChessBoard());
-            return SET_TEXT_COLOR_GREEN + "game creation successful for game "+ result[1];
+            return SET_TEXT_COLOR_GREEN + "game creation successful for game: "+ result[1];
         } catch (ResponseException e) {
             return SET_TEXT_COLOR_RED + "create game unsuccessful, " + e.getMessage();
         }
@@ -116,7 +118,7 @@ public class Client {
         if (!Objects.equals(playerColor, "WHITE") && !Objects.equals(playerColor, "BLACK") ){
             return SET_TEXT_COLOR_RED + "player color must be WHITE or BLACK";
         }
-        if (!gameIDs.containsKey(parseInt(result[1]))){
+        if (!result[1].chars().allMatch( Character::isDigit )||!gameIDs.containsKey(parseInt(result[1]))){
             return SET_TEXT_COLOR_RED + "game nonexistent, run \"list\" to see options";
         }
         try {
@@ -133,7 +135,7 @@ public class Client {
         if (result.length!=2){
             return SET_TEXT_COLOR_RED + "incorrect number of arguments, try again";
         }
-        if (!gameIDs.containsKey(parseInt(result[1]))){
+        if (!result[1].chars().allMatch( Character::isDigit )||!gameIDs.containsKey(parseInt(result[1]))){
             return SET_TEXT_COLOR_RED + "game nonexistent, run \"list\" to see options";
         }
         try{

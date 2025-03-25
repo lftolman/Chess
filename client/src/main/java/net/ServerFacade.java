@@ -59,7 +59,7 @@ public class ServerFacade {
         return this.makeRequest("POST", path, request, CreateGameResult.class);
     }
 
-    public void clearApp(ClearAppRequest request) throws ResponseException {
+    public void clearApp() throws ResponseException {
         var path = "/db";
         this.makeRequest("DELETE", path, null, null);
     }
