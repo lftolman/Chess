@@ -29,7 +29,7 @@ public class MyServiceTests {
             userService = new UserService(userDAO, authDAO);
             clearService = new ClearService(gameDAO, authDAO, userDAO);
         } catch (Exception e) {
-            fail("Setup failed du.e to unexpected Exception: " + e.getMessage());
+            fail("Setup failed due to unexpected Exception: " + e.getMessage());
         }
 
     }
