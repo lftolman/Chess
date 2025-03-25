@@ -6,8 +6,8 @@ import net.ServerFacade;
 import org.junit.jupiter.api.*;
 import server.Server;
 
-import static org.junit.jupiter.api.Assertions.*;
 
+import static org.junit.jupiter.api.Assertions.*;
 
 public class ServerFacadeTests {
 
@@ -40,6 +40,7 @@ public class ServerFacadeTests {
     }
 
     @Test
+    @Order(1)
     void registerPositive() {
         try {
             RegisterRequest registerRequest =
@@ -52,6 +53,7 @@ public class ServerFacadeTests {
     }
 
     @Test
+    @Order(2)
     void registerNegative() {
         RegisterRequest registerRequest =
                 new RegisterRequest("username", "password1", "player1@email.com");
@@ -60,6 +62,7 @@ public class ServerFacadeTests {
     }
 
     @Test
+    @Order(3)
     void loginPositive(){
         try {
             LoginRequest loginRequest = new LoginRequest("username", "password");
@@ -71,6 +74,7 @@ public class ServerFacadeTests {
     }
 
     @Test
+    @Order(4)
     void loginNegative(){
         LoginRequest loginRequest = new LoginRequest("username", "wrongPassword");
         Exception exception = assertThrows(ResponseException.class, ()->facade.login(loginRequest));
@@ -78,6 +82,7 @@ public class ServerFacadeTests {
     }
 
     @Test
+    @Order(5)
     void logoutPositive(){
         try {
             LoginRequest loginRequest = new LoginRequest("username", "password");
@@ -89,6 +94,7 @@ public class ServerFacadeTests {
     }
 
     @Test
+    @Order(6)
     void logoutNegative(){
         Exception exception = assertThrows(ResponseException.class,() ->facade.logout());
         assertEquals("Error: unauthorized", exception.getMessage());
@@ -96,6 +102,7 @@ public class ServerFacadeTests {
 
 
     @Test
+    @Order(7)
     void createPositive(){
         try {
             LoginRequest loginRequest = new LoginRequest("username", "password");
@@ -107,12 +114,14 @@ public class ServerFacadeTests {
     }
 
     @Test
+    @Order(8)
     void createNegative(){
         Exception exception = assertThrows(ResponseException.class,()->facade.createGame("game"));
         assertEquals("Error: unauthorized", exception.getMessage());
     }
 
     @Test
+    @Order(9)
     void joinPositive(){
         try{
             LoginRequest loginRequest = new LoginRequest("username", "password");
@@ -125,6 +134,7 @@ public class ServerFacadeTests {
     }
 
     @Test
+    @Order(10)
     void joinNegative(){
         LoginRequest loginRequest = new LoginRequest("username", "password");
         try {
@@ -137,6 +147,7 @@ public class ServerFacadeTests {
     }
 
     @Test
+    @Order(11)
     void listPositive(){
         try{
             LoginRequest loginRequest = new LoginRequest("username", "password");
@@ -149,6 +160,7 @@ public class ServerFacadeTests {
     }
 
     @Test
+    @Order(12)
     void listNegative(){
         Exception exception = assertThrows(ResponseException.class, ()-> facade.listGames());
         assertEquals("Error: unauthorized", exception.getMessage());
@@ -157,6 +169,7 @@ public class ServerFacadeTests {
 
 
     @Test
+    @Order(13)
     void testClear(){
         assertDoesNotThrow(()->facade.clearApp());
     }
