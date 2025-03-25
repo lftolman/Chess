@@ -1,5 +1,8 @@
 package ui;
 
+import chess.ChessGame;
+import chess.ChessPiece;
+
 import java.io.PrintStream;
 import java.nio.charset.StandardCharsets;
 import java.util.Objects;
@@ -20,17 +23,17 @@ public class ChessBoard {
             BLACK_BISHOP, BLACK_KNIGHT,BLACK_ROOK};
     private static final String[] blackPawns = {BLACK_PAWN,BLACK_PAWN,BLACK_PAWN,BLACK_PAWN,BLACK_PAWN,BLACK_PAWN,
             BLACK_PAWN,BLACK_PAWN};
-    private static String color = "WHITE";
-
 
     private static final int boardSize = 8;
     private static final int squareSize = 1;
 
-    public static void main(String[] args){
+    public static void drawBoard(String color, chess.ChessBoard board){
+
         var out = new PrintStream(System.out,true, StandardCharsets.UTF_8);
 
         out.print(ERASE_SCREEN);
-        drawTicTacToeBoard(out);
+        drawChessBoard(out, color, board);
+        out.println(ANSI_RESET);
     }
 
     public static void drawHeaders(PrintStream out, String[] headers){
@@ -55,7 +58,7 @@ public class ChessBoard {
         setWhite(out);
     }
 
-    private static void drawTicTacToeBoard(PrintStream out) {
+    private static void drawChessBoard(PrintStream out, String color,chess.ChessBoard board ) {
         if (Objects.equals(color, "WHITE")){
             String[] headers = {"    a ", " b ", " c ", " d ", " e ", " f ", " g ", " h "};
             drawHeaders(out,headers);
@@ -126,4 +129,26 @@ public class ChessBoard {
         out.print(SET_TEXT_COLOR_WHITE);
     }
 
-}
+    private String getPiece(ChessPiece piece){
+        if (piece.getTeamColor() == ChessGame.TeamColor.WHITE){
+            return pieceSwitch(piece, WHITE_QUEEN, WHITE_KNIGHT, WHITE_BISHOP, WHITE_ROOK, WHITE_KING, WHITE_PAWN);
+        }
+        else{
+            return pieceSwitch(piece, BLACK_QUEEN, BLACK_KNIGHT, BLACK_BISHOP, BLACK_ROOK, BLACK_KING, BLACK_PAWN);
+        }
+    }
+
+    private String pieceSwitch(ChessPiece piece, String queen, String knight, String bishop, String rook, String king, String pawn) {
+        switch (piece.getPieceType()){
+            case QUEEN -> {return queen;}
+            case KNIGHT -> {return knight;}
+            case BISHOP -> {return bishop;}
+            case ROOK -> {return rook;}
+            case KING -> {return king;}
+            case PAWN -> {return pawn;}
+        }
+        return null;
+    }
+
+
+    }
