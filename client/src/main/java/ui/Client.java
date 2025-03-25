@@ -35,7 +35,7 @@ public class Client {
                 case "observe" -> {return observe(result);}
                 case "logout" -> {return logout();}
                 case "quit" -> {return null;}
-                default -> { return SET_TEXT_COLOR_RED +"Input not recognized, try again.";}
+                default -> { return SET_TEXT_COLOR_RED +"input not recognized, try again.";}
             }
     }
 
@@ -74,7 +74,7 @@ public class Client {
             loggedIn = true;
             return SET_TEXT_COLOR_GREEN+"register successful for "+registerResult.username()+". you are now logged in.";
         } catch (ResponseException e) {
-            return SET_TEXT_COLOR_RED  + "register unsuccessful, " + e.getMessage();
+            return SET_TEXT_COLOR_RED  + e.getMessage();
         }
     }
 
@@ -91,11 +91,14 @@ public class Client {
             loggedIn = true;
             return SET_TEXT_COLOR_GREEN + "login successful for " + loginResult.username();
         } catch (ResponseException e) {
-            return SET_TEXT_COLOR_RED  + "login unsuccessful, " + e.getMessage();
+            return SET_TEXT_COLOR_RED  + e.getMessage();
         }
     }
 
     public String create(String[] result){
+        if (!loggedIn){
+            return SET_TEXT_COLOR_RED + "must be logged in";
+        }
         if (result.length!=2){
             return SET_TEXT_COLOR_RED  + "incorrect number of arguments, try again";
         }
@@ -111,27 +114,33 @@ public class Client {
     }
 
     public String join(String[] result){
+        if (!loggedIn){
+            return SET_TEXT_COLOR_RED + "must be logged in";
+        }
         if (result.length!=3){
             return SET_TEXT_COLOR_RED  + "incorrect number of arguments, try again";
+        }
+        if (!result[1].chars().allMatch( Character::isDigit )||!gameIDs.containsKey(parseInt(result[1]))){
+            return SET_TEXT_COLOR_RED + "game nonexistent, run \"list\" to see options";
         }
         String playerColor = result[2].toUpperCase();
         if (!Objects.equals(playerColor, "WHITE") && !Objects.equals(playerColor, "BLACK") ){
             return SET_TEXT_COLOR_RED + "player color must be WHITE or BLACK";
         }
-        if (!result[1].chars().allMatch( Character::isDigit )||!gameIDs.containsKey(parseInt(result[1]))){
-            return SET_TEXT_COLOR_RED + "game nonexistent, run \"list\" to see options";
-        }
         try {
             int gameID = gameIDs.get(parseInt(result[1]));
             server.join(gameID, playerColor);
             ChessBoard.drawBoard(playerColor, games.get(gameID));
-            return "";
+            return "game joined successfully";
         } catch (Exception e) {
-            return SET_TEXT_COLOR_RED+"could not join game: " + e.getMessage();
+            return SET_TEXT_COLOR_RED+ e.getMessage();
         }
     }
 
     public String observe(String[] result){
+        if (!loggedIn){
+            return SET_TEXT_COLOR_RED + "must be logged in";
+        }
         if (result.length!=2){
             return SET_TEXT_COLOR_RED + "incorrect number of arguments, try again";
         }
@@ -141,7 +150,7 @@ public class Client {
         try{
             int gameID = gameIDs.get(parseInt(result[1]));
             ChessBoard.drawBoard("WHITE", games.get(gameID));
-            return "";
+            return "you are now observing the game";
         } catch (Exception e) {
             return SET_TEXT_COLOR_RED + "observe unsuccessful, " + e.getMessage();
         }
@@ -154,13 +163,16 @@ public class Client {
         try{
             server.logout();
         } catch(Exception e){
-            return SET_TEXT_COLOR_RED + "logout failed: " + e.getMessage();
+            return SET_TEXT_COLOR_RED + "logout failed, " + e.getMessage();
         }
         this.loggedIn = false;
         return SET_TEXT_COLOR_GREEN + "logout successful";
     }
 
     public String list(){
+        if (!loggedIn){
+            return SET_TEXT_COLOR_RED + "must be logged in";
+        }
         try {
             ListGamesResult listGamesResult = server.listGames();
             HashMap<Integer,Integer> map = new HashMap<>();

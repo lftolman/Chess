@@ -9,7 +9,7 @@ public class ClientMain {
         if (args.length == 1) {
             serverUrl = args[0];
         }
-        System.out.println(SET_TEXT_COLOR_PURPLE + "♕ 240 Chess Client " + WHITE_KING);
+        System.out.println(SET_TEXT_COLOR_PURPLE + "♕ 240 Chess Client" + WHITE_KING);
 
         new REPL(serverUrl).run();
     }
