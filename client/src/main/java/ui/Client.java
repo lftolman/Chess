@@ -14,6 +14,7 @@ import java.util.Objects;
 
 public class Client {
     public boolean loggedIn = false;
+    public boolean inGamePlay = false;
     private final ServerFacade server;
     private HashMap<Integer, Integer> gameIDs = new HashMap<>();
     private HashMap<Integer, chess.ChessBoard> games = new HashMap<>();
@@ -34,9 +35,39 @@ public class Client {
                 case "list" -> {return list();}
                 case "observe" -> {return observe(result);}
                 case "logout" -> {return logout();}
+                case "redraw" -> {return redraw();}
+                case "make" -> {return make(result);}
+                case "resign" -> {return resign();}
+                case "highlight" -> {return highlight(result);}
+                case "leave" -> {return leave();}
                 case "quit" -> {return null;}
                 default -> { return SET_TEXT_COLOR_RED +"input not recognized, try again.";}
             }
+    }
+
+    public String leave() {
+        inGamePlay = false;
+        return SET_TEXT_COLOR_GREEN + "successfully left the game";
+    }
+
+    public String redraw() {
+
+        return SET_TEXT_COLOR_GREEN + "redraw board successful";
+
+    }
+
+    private String make(String[] result) {
+        return SET_TEXT_COLOR_GREEN + "Move made successfully";
+    }
+
+    public String resign() {
+        inGamePlay = false;
+        return SET_TEXT_COLOR_GREEN + "successfully left the game";
+    }
+
+    public String highlight(String[] result) {
+        return SET_TEXT_COLOR_GREEN + "highlighted moves for " + result[1];
+
     }
 
     public String help(){
@@ -46,16 +77,32 @@ public class Client {
             output = output + SET_TEXT_COLOR_LIGHT_BLUE+ "\nregister <USERNAME> <PASSWORD> <EMAIL> " +
                     SET_TEXT_COLOR_PURPLE + "- to create an account";
             output = output + SET_TEXT_COLOR_LIGHT_BLUE+ "\nlogin <USERNAME> <PASSWORD> " +SET_TEXT_COLOR_PURPLE +
-                    "- to play chess";}
-        else{
+                    "- to play chess";
+            output = output + SET_TEXT_COLOR_LIGHT_BLUE+ "\nquit " +SET_TEXT_COLOR_PURPLE + "- playing chess";
+        }
+        else if (loggedIn && !inGamePlay){
+            output = output + SET_TEXT_COLOR_LIGHT_BLUE+"\nlist "+SET_TEXT_COLOR_PURPLE + "- games";
             output = output+SET_TEXT_COLOR_LIGHT_BLUE+"\ncreate <NAME> "+SET_TEXT_COLOR_PURPLE+
                     "- a game";
             output = output + SET_TEXT_COLOR_LIGHT_BLUE+"\njoin <ID> [WHITE|BLACK] "
                     +SET_TEXT_COLOR_PURPLE + "- a game";
             output = output + SET_TEXT_COLOR_LIGHT_BLUE+"\nobserve <ID> "+SET_TEXT_COLOR_PURPLE + "- a game";
             output = output + SET_TEXT_COLOR_LIGHT_BLUE+"\nlogout "+SET_TEXT_COLOR_PURPLE + "- when you are done";
+            output = output + SET_TEXT_COLOR_LIGHT_BLUE+ "\nquit " +SET_TEXT_COLOR_PURPLE + "- playing chess";
+
         }
-        output = output + SET_TEXT_COLOR_LIGHT_BLUE+ "\nquit " +SET_TEXT_COLOR_PURPLE + "- playing chess";
+        else{
+            output = output + SET_TEXT_COLOR_LIGHT_BLUE+ "\nredraw " +
+                    SET_TEXT_COLOR_PURPLE + "- chess board";
+            output = output + SET_TEXT_COLOR_LIGHT_BLUE+ "\nleave " +SET_TEXT_COLOR_PURPLE +
+                    "- the game";
+            output = output + SET_TEXT_COLOR_LIGHT_BLUE+ "\nmake move <MOVE> " +SET_TEXT_COLOR_PURPLE +
+                    "- your";
+            output = output + SET_TEXT_COLOR_LIGHT_BLUE+ "\nresign " +SET_TEXT_COLOR_PURPLE +
+                    "- the game";
+            output = output + SET_TEXT_COLOR_LIGHT_BLUE+ "\nhighlight <POSITION> " +SET_TEXT_COLOR_PURPLE +
+                    "- legal moves";
+        }
         return output;
     }
 
@@ -130,7 +177,7 @@ public class Client {
         try {
             int gameID = gameIDs.get(parseInt(result[1]));
             server.join(gameID, playerColor);
-            ChessBoard.drawBoard(playerColor, games.get(gameID));
+            ChessBoard.drawBoard(playerColor,games.get(gameID),null,null );
             return "game joined successfully";
         } catch (Exception e) {
             return SET_TEXT_COLOR_RED+ e.getMessage();
@@ -149,7 +196,7 @@ public class Client {
         }
         try{
             int gameID = gameIDs.get(parseInt(result[1]));
-            ChessBoard.drawBoard("WHITE", games.get(gameID));
+            ChessBoard.drawBoard("WHITE", games.get(gameID), null,null);
             return "you are now observing the game";
         } catch (Exception e) {
             return SET_TEXT_COLOR_RED + "observe unsuccessful, " + e.getMessage();

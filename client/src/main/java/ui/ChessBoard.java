@@ -2,9 +2,13 @@ package ui;
 
 import chess.ChessGame;
 import chess.ChessPiece;
+import chess.ChessPosition;
 
 import java.io.PrintStream;
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
 import java.util.Objects;
 
 import static ui.EscapeSequences.*;
@@ -27,12 +31,20 @@ public class ChessBoard {
     private static final int BOARD_SIZE = 8;
     private static final int SQUARE_SIZE = 1;
 
-    public static void drawBoard(String color, chess.ChessBoard board){
+    private static String color;
+
+    private static HashMap<Integer,String> letters = new HashMap<>();
+    private static HashMap<String, String> pieceMap = new HashMap<>();
+
+    public static void drawBoard(String color, chess.ChessBoard board, List<String> possibleMoves, String startPosition){
+        ChessBoard.color = color;
+        mapPieces();
+        mapLetters();
 
         var out = new PrintStream(System.out,true, StandardCharsets.UTF_8);
 
         out.print(ERASE_SCREEN);
-        drawChessBoard(out, color, board);
+        drawChessBoard(out,board, possibleMoves, startPosition);
         out.println(ANSI_RESET);
     }
 
@@ -55,96 +67,99 @@ public class ChessBoard {
         setWhite(out);
     }
 
-    private static void drawChessBoard(PrintStream out, String color,chess.ChessBoard board ) {
-        if (Objects.equals(color, "WHITE")){
+    private static void drawChessBoard(PrintStream out,chess.ChessBoard board, List<String> possibleMoves, String startPosition) {
+        if (Objects.equals(color, "WHITE")) {
             String[] headers = {"    a ", " b ", " c ", " d ", " e ", " f ", " g ", " h "};
-            drawHeaders(out,headers);
-            drawRow(out, BLACK_PIECES, 0, SET_TEXT_COLOR_BLACK, 8);
-            drawRow(out, BLACK_PAWNS, 1, SET_TEXT_COLOR_BLACK, 7);
-            for (int i = 0; i<4;i++){
-                printHeaderText(out," "+(6-i)+" ");
-                drawMiddle(out,(i+1)%2 );
-                printHeaderText(out," "+ (6 - i));
-                out.println();
+            drawHeaders(out, headers);
+            for (int i = 0; i < 8; i++) {
+                List<String> pieces = new ArrayList<>();
+                List<String> colors = new ArrayList<>();
+                for (int j = 0; j < 8; j++) {
+                    drawMiddle(board, possibleMoves, startPosition, i, pieces, colors, j);
+                }
+                drawRow(out, pieces, 8-i, colors);
             }
-            drawRow(out, WHITE_PAWNS,0,SET_TEXT_COLOR_WHITE,2);
-            drawRow(out, WHITE_PIECES,1,SET_TEXT_COLOR_WHITE, 1);
-            drawHeaders(out,headers);}
+            drawHeaders(out, headers);
+        }
         else{
             String[] headers = {"    h ", " g ", " f ", " e ", " d ", " c ", " b ", " a "};
-            drawHeaders(out,headers);
-            drawRow(out, WHITE_REVERSED,0,SET_TEXT_COLOR_WHITE, 1);
-            drawRow(out, WHITE_PAWNS,1,SET_TEXT_COLOR_WHITE, 2);
-            for (int i = 0; i<4;i++){
-                printHeaderText(out," "+(i+3)+" ");
-                drawMiddle(out,(i+1)%2 );
-                printHeaderText(out," "+ (i+3));
-                out.println();
-            }
-            drawRow(out, BLACK_PAWNS, 0, SET_TEXT_COLOR_BLACK, 7);
-            drawRow(out, BLACK_REVERSED, 1, SET_TEXT_COLOR_BLACK, 8);
-            drawHeaders(out,headers);
-        }
+            drawHeaders(out, headers);
+            for (int i = 7; i > -1; i--) {
+                List<String> pieces = new ArrayList<>();
+                List<String> colors = new ArrayList<>();
+                for (int j = 7; j > -1; j--) {
+                    drawMiddle(board, possibleMoves, startPosition, i, pieces, colors, j);
 
+                }
+                drawRow(out, pieces, i+1, colors);
+            }
+            drawHeaders(out, headers);
+        }
     }
 
-    private static void drawRow(PrintStream out,String[] pieces, int whiteCol, String pieceColor, int row){
+    private static void drawMiddle(chess.ChessBoard board, List<String> possibleMoves, String startPosition, int i, List<String> pieces, List<String> colors, int j) {
+        ChessPiece piece = board.getPiece(new ChessPosition(i+1, j+1));
+        if (piece == null) {
+            pieces.add(EMPTY);
+        } else {
+            pieces.add(pieceMap.get(piece.toString()));
+        }
+        if ((possibleMoves!=null)&&possibleMoves.contains(letters.get(j) + i+1)) {
+            colors.add(SET_BG_COLOR_BLUE);
+        } else if ((startPosition!=null)&&(letters.get(j) + i).equals(startPosition)) {
+            colors.add(SET_BG_COLOR_RED);
+        } else {
+            if ((i + j) % 2 == 0) {
+                colors.add(SET_BG_COLOR_LIGHT_BLUE);
+            } else {
+                colors.add(SET_BG_COLOR_PURPLE);
+            }
+        }
+    }
+
+    private static void drawRow(PrintStream out, List<String> pieces, int row, List<String> background){
         printHeaderText(out, " "+row +" ");
         for (int squareRow = 0; squareRow < SQUARE_SIZE; squareRow++) {
             for (int boardCol = 0; boardCol < BOARD_SIZE; ++boardCol) {
-                out.print(pieceColor);
-                if ((boardCol+whiteCol) %2 == 0 ){
-                    out.print(SET_BG_COLOR_LIGHT_BLUE);
-                }
-                else{
-                    out.print(SET_BG_COLOR_PURPLE);
-                }
-                out.print(pieces[boardCol]);
+                out.print(background.get(boardCol));
+                out.print(pieces.get(boardCol));
             }
         }
         printHeaderText(out," "+row);
         out.println();
     }
 
-    private static void drawMiddle(PrintStream out, int whiteCol) {
-
-        for (int squareRow = 0; squareRow < SQUARE_SIZE; squareRow++) {
-            for (int boardCol = 0; boardCol < BOARD_SIZE; ++boardCol) {
-                if ((boardCol + whiteCol) %2 == 1 ){
-                    out.print(SET_BG_COLOR_LIGHT_BLUE);
-                }
-                else{
-                    out.print(SET_BG_COLOR_PURPLE);
-                }
-                out.print(EMPTY.repeat(SQUARE_SIZE));
-            }
-        }
-    }
 
     private static void setWhite(PrintStream out) {
         out.print(SET_BG_COLOR_WHITE);
         out.print(SET_TEXT_COLOR_WHITE);
     }
 
-    private String getPiece(ChessPiece piece){
-        if (piece.getTeamColor() == ChessGame.TeamColor.WHITE){
-            return pieceSwitch(piece, WHITE_QUEEN, WHITE_KNIGHT, WHITE_BISHOP, WHITE_ROOK, WHITE_KING, WHITE_PAWN);
-        }
-        else{
-            return pieceSwitch(piece, BLACK_QUEEN, BLACK_KNIGHT, BLACK_BISHOP, BLACK_ROOK, BLACK_KING, BLACK_PAWN);
-        }
+
+    private static void mapPieces(){
+        pieceMap.put("p",SET_TEXT_COLOR_BLACK + BLACK_PAWN);
+        pieceMap.put("P",SET_TEXT_COLOR_WHITE + WHITE_PAWN);
+        pieceMap.put("n",SET_TEXT_COLOR_BLACK +BLACK_KNIGHT);
+        pieceMap.put("N",SET_TEXT_COLOR_WHITE +WHITE_KNIGHT);
+        pieceMap.put("b",SET_TEXT_COLOR_BLACK +BLACK_BISHOP);
+        pieceMap.put("B",SET_TEXT_COLOR_WHITE +WHITE_BISHOP);
+        pieceMap.put("r",SET_TEXT_COLOR_BLACK +BLACK_ROOK);
+        pieceMap.put("R",SET_TEXT_COLOR_WHITE +WHITE_ROOK);
+        pieceMap.put("q",SET_TEXT_COLOR_BLACK +BLACK_QUEEN);
+        pieceMap.put("Q",SET_TEXT_COLOR_WHITE +WHITE_QUEEN);
+        pieceMap.put("k",SET_TEXT_COLOR_BLACK +BLACK_KING);
+        pieceMap.put("K",SET_TEXT_COLOR_WHITE +WHITE_KING);
     }
 
-    private String pieceSwitch(ChessPiece piece, String queen, String knight, String bishop, String rook, String king, String pawn) {
-        switch (piece.getPieceType()){
-            case QUEEN -> {return queen;}
-            case KNIGHT -> {return knight;}
-            case BISHOP -> {return bishop;}
-            case ROOK -> {return rook;}
-            case KING -> {return king;}
-            case PAWN -> {return pawn;}
-        }
-        return null;
+    private static void mapLetters(){
+        letters.put(0, "a");
+        letters.put(1, "b");
+        letters.put(2, "c");
+        letters.put(3, "d");
+        letters.put(4, "e");
+        letters.put(5, "f");
+        letters.put(6, "g");
+        letters.put(7, "h");
     }
 
 
