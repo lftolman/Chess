@@ -106,7 +106,7 @@ public class ChessBoard {
         }
         if ((possibleMoves!=null)&&possibleMoves.contains(letters.get(j) + i+1)) {
             colors.add(SET_BG_COLOR_BLUE);
-        } else if ((startPosition!=null)&&(letters.get(j) + i).equals(startPosition)) {
+        } else if ((startPosition!=null)&&(letters.get(j) + i +1).equals(startPosition)) {
             colors.add(SET_BG_COLOR_RED);
         } else {
             if ((i + j) % 2 == 0) {
