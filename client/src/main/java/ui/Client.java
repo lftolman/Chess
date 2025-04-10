@@ -8,7 +8,9 @@ import model.*;
 import net.REPL;
 import net.ServerFacade;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Objects;
 
 
@@ -16,9 +18,10 @@ public class Client {
     public boolean loggedIn = false;
     public boolean inGamePlay = false;
     private final ServerFacade server;
-    private HashMap<Integer, Integer> gameIDs = new HashMap<>();
+//    private HashMap<Integer, Integer> gameIDs = new HashMap<>();
     private HashMap<Integer, chess.ChessBoard> games = new HashMap<>();
     private int viewerID = 0;
+    private List<Integer> uiMapping = new ArrayList<>();
 
     public Client(String serverUrl, REPL repl){
         this.server = new ServerFacade(serverUrl);
@@ -151,9 +154,10 @@ public class Client {
         }
         try {
             CreateGameResult createGameResult = server.createGame(result[1]);
-            viewerID++;
-            gameIDs.put(viewerID,createGameResult.gameID());
-            games.put(createGameResult.gameID(),new chess.ChessBoard());
+//            viewerID++;
+//            gameIDs.put(viewerID,createGameResult.gameID());
+//            games.put(createGameResult.gameID(),new chess.ChessBoard());
+            String listResult = list();
             return SET_TEXT_COLOR_GREEN + "game creation successful for game: "+ result[1];
         } catch (ResponseException e) {
             return SET_TEXT_COLOR_RED + "create game unsuccessful, " + e.getMessage();
@@ -167,7 +171,11 @@ public class Client {
         if (result.length!=3){
             return SET_TEXT_COLOR_RED  + "incorrect number of arguments, try again";
         }
-        if (!result[1].chars().allMatch( Character::isDigit )||!gameIDs.containsKey(parseInt(result[1]))){
+        if (!result[1].chars().allMatch( Character::isDigit )){
+            return SET_TEXT_COLOR_RED + "game nonexistent, run \"list\" to see options";
+        }
+        int index = parseInt(result[1]) - 1;
+        if (index < 0 || index >= uiMapping.size()){
             return SET_TEXT_COLOR_RED + "game nonexistent, run \"list\" to see options";
         }
         String playerColor = result[2].toUpperCase();
@@ -175,7 +183,7 @@ public class Client {
             return SET_TEXT_COLOR_RED + "player color must be WHITE or BLACK";
         }
         try {
-            int gameID = gameIDs.get(parseInt(result[1]));
+            int gameID = uiMapping.get(index);
             server.join(gameID, playerColor);
             ChessBoard.drawBoard(playerColor,games.get(gameID),null,null );
             return "game joined successfully";
@@ -191,11 +199,15 @@ public class Client {
         if (result.length!=2){
             return SET_TEXT_COLOR_RED + "incorrect number of arguments, try again";
         }
-        if (!result[1].chars().allMatch( Character::isDigit )||!gameIDs.containsKey(parseInt(result[1]))){
+        if (!result[1].chars().allMatch( Character::isDigit )){
+            return SET_TEXT_COLOR_RED + "game nonexistent, run \"list\" to see options";
+        }
+        int index = parseInt(result[1]) - 1;
+        if (index < 0 || index >= uiMapping.size()){
             return SET_TEXT_COLOR_RED + "game nonexistent, run \"list\" to see options";
         }
         try{
-            int gameID = gameIDs.get(parseInt(result[1]));
+            int gameID = uiMapping.get(index);
             ChessBoard.drawBoard("WHITE", games.get(gameID), null,null);
             return "you are now observing the game";
         } catch (Exception e) {
@@ -222,14 +234,17 @@ public class Client {
         }
         try {
             ListGamesResult listGamesResult = server.listGames();
-            HashMap<Integer,Integer> map = new HashMap<>();
+//            HashMap<Integer,Integer> map = new HashMap<>();
+            HashMap<Integer,chess.ChessBoard> mapTwo = new HashMap<>();
+            uiMapping.clear();
             int i = 0;
             StringBuilder sb = new StringBuilder();
             sb.append(SET_TEXT_COLOR_PURPLE);
             sb.append("gameID    game name    white player    black player    \n");
             for (var game: listGamesResult.games()){
+                uiMapping.add(game.gameID());
                 i++;
-                games.put(game.gameID(),game.game().getBoard());
+                mapTwo.put(game.gameID(),game.game().getBoard());
                 String whiteUsername = game.whiteUsername();
                 String blackUsername = game.blackUsername();
                 int whiteLength = 0;
@@ -246,7 +261,7 @@ public class Client {
                 if (blackUsername == null){
                     blackUsername = "";
                 }
-                map.put(i,game.gameID());
+//                map.put(i,game.gameID());
                 sb.append(i);
                 sb.append(" ".repeat(10 - String.valueOf(i).length()));
                 sb.append(game.gameName());
@@ -257,7 +272,8 @@ public class Client {
                 sb.append(" ".repeat(16 - blackLength));
                 sb.append("\n");
             }
-            gameIDs = map;
+            viewerID = i;
+            this.games = mapTwo;
             return sb.toString();
         } catch (Exception e) {
             return SET_TEXT_COLOR_RED + "list games unsuccessful, " + e.getMessage();

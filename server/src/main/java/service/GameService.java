@@ -6,6 +6,7 @@ import dataaccess.GameDataAccess;
 import exception.ResponseException;
 import model.*;
 
+import java.util.Collection;
 import java.util.Objects;
 import java.util.UUID;
 
@@ -13,12 +14,20 @@ import java.util.UUID;
 public class GameService {
     private GameDataAccess gameDataAccess;
     private AuthDataAccess authDataAccess;
-    private int gameID = 0;
+    private int gameID;
 
 
-    public GameService(GameDataAccess gameDataAccess, AuthDataAccess authDataAccess){
+    public GameService(GameDataAccess gameDataAccess, AuthDataAccess authDataAccess) throws ResponseException {
         this.gameDataAccess = gameDataAccess;
         this.authDataAccess = authDataAccess;
+        Collection<GameData> games = null;
+        try {
+            games = gameDataAccess.listGames();
+        } catch (DataAccessException e) {
+            throw new ResponseException(500,"Error: "+ e.getMessage());
+        }
+        this.gameID = games.size();
+
     }
 
     public static String generateToken() {
@@ -34,7 +43,6 @@ public class GameService {
             if (authDataAccess.getAuth(authToken) == null){
                 throw new ResponseException(401,"Error: unauthorized");
             }
-
             return new ListGamesResult(gameDataAccess.listGames());
         }catch (DataAccessException e) {
             throw new ResponseException(500,"Error: "+ e.getMessage());
@@ -63,7 +71,8 @@ public class GameService {
 
     public void joinGame(JoinGameRequest joinGameRequest) throws ResponseException {
         try{
-            if ((joinGameRequest.playerColor()==null)||(gameID == 0)||((!joinGameRequest.playerColor().equals("WHITE")
+
+            if ((joinGameRequest.playerColor()==null)||(joinGameRequest.gameID() == 0)||((!joinGameRequest.playerColor().equals("WHITE")
                     &&!joinGameRequest.playerColor().equals("BLACK")))){
                 throw new ResponseException(400,"Error: bad request");
             }
@@ -75,11 +84,11 @@ public class GameService {
             if (gameData == null){
                 throw new ResponseException(400,"Error: bad request");
             }if ((gameData.whiteUsername() == null)&& Objects.equals(joinGameRequest.playerColor(), "WHITE")){
-                GameData newData = new GameData(gameID,authData.username(),gameData.blackUsername(), gameData.gameName(), gameData.game());
+                GameData newData = new GameData(joinGameRequest.gameID(),authData.username(),gameData.blackUsername(), gameData.gameName(), gameData.game());
                 gameDataAccess.updateGame(joinGameRequest.gameID(),newData);
             }
             else if ((gameData.blackUsername() == null)&& Objects.equals(joinGameRequest.playerColor(), "BLACK")){
-                GameData newData = new GameData(gameID,gameData.whiteUsername(),authData.username(), gameData.gameName(), gameData.game());
+                GameData newData = new GameData(joinGameRequest.gameID(),gameData.whiteUsername(),authData.username(), gameData.gameName(), gameData.game());
                 gameDataAccess.updateGame(joinGameRequest.gameID(),newData);
             }
             else{
