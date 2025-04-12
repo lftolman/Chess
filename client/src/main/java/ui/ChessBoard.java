@@ -34,11 +34,13 @@ public class ChessBoard {
     private static String color;
 
     private static HashMap<Integer,String> letters = new HashMap<>();
+    private static HashMap<String, Integer> columns = new HashMap<>();
     private static HashMap<String, String> pieceMap = new HashMap<>();
 
     public static void drawBoard(String color, chess.ChessBoard board, List<String> possibleMoves, String startPosition){
         ChessBoard.color = color;
         mapPieces();
+        mapColumns();
         mapLetters();
 
         var out = new PrintStream(System.out,true, StandardCharsets.UTF_8);
@@ -71,25 +73,26 @@ public class ChessBoard {
         if (Objects.equals(color, "WHITE")) {
             String[] headers = {"    a ", " b ", " c ", " d ", " e ", " f ", " g ", " h "};
             drawHeaders(out, headers);
-            for (int i = 0; i < 8; i++) {
-                List<String> pieces = new ArrayList<>();
-                List<String> colors = new ArrayList<>();
-                for (int j = 0; j < 8; j++) {
-                    drawMiddle(board, possibleMoves, startPosition, i, pieces, colors, j);
-                }
-                drawRow(out, pieces, 8-i, colors);
-            }
-            drawHeaders(out, headers);
-        }
-        else{
-            String[] headers = {"    h ", " g ", " f ", " e ", " d ", " c ", " b ", " a "};
-            drawHeaders(out, headers);
             for (int i = 7; i > -1; i--) {
                 List<String> pieces = new ArrayList<>();
                 List<String> colors = new ArrayList<>();
                 for (int j = 7; j > -1; j--) {
                     drawMiddle(board, possibleMoves, startPosition, i, pieces, colors, j);
 
+                }
+                drawRow(out, pieces, i+1, colors);
+            }
+            drawHeaders(out, headers);
+        }
+        else{
+            String[] headers = {"    h ", " g ", " f ", " e ", " d ", " c ", " b ", " a "};
+            drawHeaders(out, headers);
+
+            for (int i = 0; i < 8; i++) {
+                List<String> pieces = new ArrayList<>();
+                List<String> colors = new ArrayList<>();
+                for (int j = 0; j < 8; j++) {
+                    drawMiddle(board, possibleMoves, startPosition, i, pieces, colors, j);
                 }
                 drawRow(out, pieces, i+1, colors);
             }
@@ -104,15 +107,19 @@ public class ChessBoard {
         } else {
             pieces.add(pieceMap.get(piece.toString()));
         }
-        if ((possibleMoves!=null)&&possibleMoves.contains(letters.get(j) + i+1)) {
-            colors.add(SET_BG_COLOR_BLUE);
-        } else if ((startPosition!=null)&&(letters.get(j) + i +1).equals(startPosition)) {
-            colors.add(SET_BG_COLOR_RED);
-        } else {
-            if ((i + j) % 2 == 0) {
-                colors.add(SET_BG_COLOR_LIGHT_BLUE);
+        int row = i+1;
+        if ((startPosition!=null)&&(letters.get(j) + row).equals(startPosition)) {
+            colors.add(SET_BG_COLOR_LIGHT_PURPLE);
+        }
+        else {
+            if ((i + j) %2 == 0) {
+                if ((possibleMoves!=null)&&possibleMoves.contains(letters.get(j) + row)) {
+                    colors.add(SET_BG_COLOR_DARK_PURPLE);}
+                else{colors.add(SET_BG_COLOR_LIGHT_BLUE);}
             } else {
-                colors.add(SET_BG_COLOR_PURPLE);
+                if ((possibleMoves!=null)&&possibleMoves.contains(letters.get(j) + row)) {
+                    colors.add(SET_BG_COLOR_BLUE_PURPLE);}
+                else{colors.add(SET_BG_COLOR_PURPLE);}
             }
         }
     }
@@ -160,6 +167,24 @@ public class ChessBoard {
         letters.put(5, "f");
         letters.put(6, "g");
         letters.put(7, "h");
+    }
+    private static void mapColumns(){
+        columns.put("a", 7);
+        columns.put("b", 6);
+        columns.put("c", 5);
+        columns.put("d", 4);
+        columns.put("e", 3);
+        columns.put("f", 2);
+        columns.put("g", 1);
+        columns.put("h", 0);
+    }
+
+    public static ChessPosition chessPosition(String[] stringPosition){
+        return new ChessPosition(Integer.parseInt(stringPosition[1]),columns.get(stringPosition[0].toLowerCase())+1);
+    }
+
+    public static String stringPosition(ChessPosition position){
+       return letters.get(position.getColumn()-1) + position.getRow();
     }
 
 
