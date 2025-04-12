@@ -77,8 +77,12 @@ public class ChessGame {
      */
     public Collection<ChessMove> validMoves(ChessPosition startPosition) {
         ChessPiece current = board.getPiece(startPosition);
-        Collection<ChessMove> allPossible = current.pieceMoves(board, startPosition);
         Collection<ChessMove> validMoves = new ArrayList<>();
+//        || teamTurn != current.getTeamColor()
+        if (current == null){
+            return validMoves;
+        }
+        Collection<ChessMove> allPossible = current.pieceMoves(board, startPosition);
         for (var move : allPossible){
             if (tryMove(move)){
                 validMoves.add(move);
