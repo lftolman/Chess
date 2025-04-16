@@ -1,6 +1,5 @@
 package ui;
 
-import chess.ChessGame;
 import chess.ChessPiece;
 import chess.ChessPosition;
 
@@ -33,7 +32,7 @@ public class ChessBoard {
 
     private static String color;
 
-    private static HashMap<Integer,String> letters = new HashMap<>();
+    private static HashMap<Integer,String> letterMap;
     private static HashMap<String, Integer> columns = new HashMap<>();
     private static HashMap<String, String> pieceMap = new HashMap<>();
 
@@ -41,7 +40,7 @@ public class ChessBoard {
         ChessBoard.color = color;
         mapPieces();
         mapColumns();
-        mapLetters();
+        letterMap = chess.ChessPosition.getLetterMap();
 
         var out = new PrintStream(System.out,true, StandardCharsets.UTF_8);
 
@@ -100,7 +99,8 @@ public class ChessBoard {
         }
     }
 
-    private static void drawMiddle(chess.ChessBoard board, List<String> possibleMoves, String startPosition, int i, List<String> pieces, List<String> colors, int j) {
+    private static void drawMiddle(chess.ChessBoard board, List<String> possibleMoves,
+                                   String startPosition, int i, List<String> pieces, List<String> colors, int j) {
         ChessPiece piece = board.getPiece(new ChessPosition(i+1, j+1));
         if (piece == null) {
             pieces.add(EMPTY);
@@ -108,16 +108,16 @@ public class ChessBoard {
             pieces.add(pieceMap.get(piece.toString()));
         }
         int row = i+1;
-        if ((startPosition!=null)&&(letters.get(j) + row).equals(startPosition)) {
+        if ((startPosition!=null)&&(letterMap.get(j) + row).equals(startPosition)) {
             colors.add(SET_BG_COLOR_LIGHT_PURPLE);
         }
         else {
             if ((i + j) %2 == 1) {
-                if ((possibleMoves!=null)&&possibleMoves.contains(letters.get(j) + row)) {
+                if ((possibleMoves!=null)&&possibleMoves.contains(letterMap.get(j) + row)) {
                     colors.add(SET_BG_COLOR_DARK_PURPLE);}
                 else{colors.add(SET_BG_COLOR_LIGHT_BLUE);}
             } else {
-                if ((possibleMoves!=null)&&possibleMoves.contains(letters.get(j) + row)) {
+                if ((possibleMoves!=null)&&possibleMoves.contains(letterMap.get(j) + row)) {
                     colors.add(SET_BG_COLOR_BLUE_PURPLE);}
                 else{colors.add(SET_BG_COLOR_PURPLE);}
             }
@@ -158,16 +158,6 @@ public class ChessBoard {
         pieceMap.put("K",SET_TEXT_COLOR_WHITE +WHITE_KING);
     }
 
-    private static void mapLetters(){
-        letters.put(0, "a");
-        letters.put(1, "b");
-        letters.put(2, "c");
-        letters.put(3, "d");
-        letters.put(4, "e");
-        letters.put(5, "f");
-        letters.put(6, "g");
-        letters.put(7, "h");
-    }
     private static void mapColumns(){
         columns.put("a", 7);
         columns.put("b", 6);

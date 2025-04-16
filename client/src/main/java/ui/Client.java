@@ -86,16 +86,14 @@ public class Client {
             ChessPosition from = ChessBoard.chessPosition(result[1].split(""));
             ChessPosition to = ChessBoard.chessPosition(result[2].split(""));
             Collection<ChessMove> validMoves = chessGame.game().validMoves(from);
-            if (board.getPiece(from).getPieceType() == ChessPiece.PieceType.PAWN) {
-                for (var move : validMoves) {
-                    if (move.getPromotionPiece() != null && (move.getEndPosition() == to)) {
-                        if (result.length != 4) {
-                            return SET_TEXT_COLOR_RED + "promotion piece required";
-                        }
-                        promo = getPieceType(result[3]);
-                        if (promo == null) {
-                            return SET_TEXT_COLOR_RED + "promotion piece must be QUEEN or KNIGHT or BISHOP or ROOK";
-                        }
+            for (var move : validMoves) {
+                if (move.getPromotionPiece() != null && (move.getEndPosition() == to)) {
+                    if (result.length != 4) {
+                        return SET_TEXT_COLOR_RED + "promotion piece required";
+                    }
+                    promo = getPieceType(result[3]);
+                    if (promo == null) {
+                        return SET_TEXT_COLOR_RED + "promotion piece must be QUEEN or KNIGHT or BISHOP or ROOK";
                     }
                 }
             }

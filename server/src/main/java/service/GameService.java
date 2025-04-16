@@ -84,11 +84,13 @@ public class GameService {
             if (gameData == null){
                 throw new ResponseException(400,"Error: bad request");
             }if ((gameData.whiteUsername() == null)&& Objects.equals(joinGameRequest.playerColor(), "WHITE")){
-                GameData newData = new GameData(joinGameRequest.gameID(),authData.username(),gameData.blackUsername(), gameData.gameName(), gameData.game());
+                GameData newData = new GameData(joinGameRequest.gameID(),
+                        authData.username(),gameData.blackUsername(), gameData.gameName(), gameData.game());
                 gameDataAccess.updateGame(joinGameRequest.gameID(),newData);
             }
             else if ((gameData.blackUsername() == null)&& Objects.equals(joinGameRequest.playerColor(), "BLACK")){
-                GameData newData = new GameData(joinGameRequest.gameID(),gameData.whiteUsername(),authData.username(), gameData.gameName(), gameData.game());
+                GameData newData = new GameData(joinGameRequest.gameID(),
+                        gameData.whiteUsername(),authData.username(), gameData.gameName(), gameData.game());
                 gameDataAccess.updateGame(joinGameRequest.gameID(),newData);
             }
             else{

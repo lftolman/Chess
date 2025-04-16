@@ -123,7 +123,8 @@ public class WebSocketHandler {
          try{
              String visitorName = authDAO.getAuth(authToken).username();
              GameData gameData = gameDAO.getGame(gameID);
-             if (!gameData.game().isInGamePlay() || !teamColor(visitorName, gameData).equals(gameData.game().getTeamTurn().toString().toLowerCase())) {
+             if (!gameData.game().isInGamePlay() ||
+                     !teamColor(visitorName, gameData).equals(gameData.game().getTeamTurn().toString().toLowerCase())) {
                  throw new ResponseException(500, "make move not allowed");
              }
              if (chessMove == null){

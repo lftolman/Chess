@@ -74,4 +74,8 @@ public class ChessPosition {
     public static String stringPosition(ChessPosition position){
         return letters.get(position.getColumn()-1) + position.getRow();
     }
+
+    public static HashMap<Integer,String> getLetterMap(){
+        return letters;
+    }
 }
