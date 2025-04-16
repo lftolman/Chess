@@ -1,5 +1,6 @@
 package chess;
 
+import java.util.HashMap;
 import java.util.Objects;
 
 /**
@@ -9,13 +10,16 @@ import java.util.Objects;
  * signature of the existing methods.
  */
 public class ChessPosition {
+    private static HashMap<Integer,String> letters = new HashMap<>();
 
     private int row;
     private int col;
 
+
     public ChessPosition(int row, int col) {
         this.row = row;
         this.col = col;
+        mapLetters();
     }
 
     /**
@@ -54,5 +58,20 @@ public class ChessPosition {
                 "row=" + row +
                 ", col=" + col +
                 '}';
+    }
+
+    private static void mapLetters(){
+        letters.put(0, "a");
+        letters.put(1, "b");
+        letters.put(2, "c");
+        letters.put(3, "d");
+        letters.put(4, "e");
+        letters.put(5, "f");
+        letters.put(6, "g");
+        letters.put(7, "h");
+    }
+
+    public static String stringPosition(ChessPosition position){
+        return letters.get(position.getColumn()-1) + position.getRow();
     }
 }

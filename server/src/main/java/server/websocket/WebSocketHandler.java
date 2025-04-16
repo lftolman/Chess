@@ -1,6 +1,8 @@
 package server.websocket;
 
 import chess.ChessGame;
+import chess.ChessMove;
+import chess.ChessPosition;
 import com.google.gson.Gson;
 import dataaccess.AuthDataAccess;
 import dataaccess.GameDataAccess;
@@ -10,11 +12,11 @@ import model.GameData;
 import org.eclipse.jetty.websocket.api.Session;
 import org.eclipse.jetty.websocket.api.annotations.OnWebSocketMessage;
 import org.eclipse.jetty.websocket.api.annotations.WebSocket;
+import websocket.commands.MakeMoveCommand;
 import websocket.commands.UserGameCommand;
 import websocket.messages.ErrorMessage;
 import websocket.messages.LoadGameMessage;
 import websocket.messages.NotificationMessage;
-import websocket.messages.ServerMessage;
 
 import java.io.IOException;
 
@@ -39,7 +41,10 @@ public class WebSocketHandler {
                 case CONNECT -> connect(action.getAuthToken(),action.getGameID(), session);
                 case LEAVE -> leave(action.getAuthToken(),action.getGameID());
                 case RESIGN -> resign(action.getAuthToken(),action.getGameID());
-                case MAKE_MOVE -> makeMove(action.getAuthToken(),action.getGameID());
+                case MAKE_MOVE -> {
+                    MakeMoveCommand moveAction = new Gson().fromJson(message, MakeMoveCommand.class);
+                    makeMove(moveAction.getAuthToken(),moveAction.getGameID(), moveAction.getChessMove());
+                }
             }
         } catch (Exception e) {
             String error = "Error: " + e.getMessage();
@@ -114,13 +119,28 @@ public class WebSocketHandler {
         }
     }
 
-     private void makeMove(String authToken, int gameID) throws ResponseException {
+     private void makeMove(String authToken, int gameID, ChessMove chessMove) throws ResponseException {
          try{
              String visitorName = authDAO.getAuth(authToken).username();
              GameData gameData = gameDAO.getGame(gameID);
-             if (!gameData.game().isInGamePlay() || teamColor(visitorName, gameData).equals("observer")) {
-                 throw new ResponseException(500, "resign not allowed");
+             if (!gameData.game().isInGamePlay() || !teamColor(visitorName, gameData).equals(gameData.game().getTeamTurn().toString().toLowerCase())) {
+                 throw new ResponseException(500, "make move not allowed");
              }
+             if (chessMove == null){
+                 throw new ResponseException(500, "no move provided");
+             }
+
+             ChessGame game = gameData.game();
+             game.makeMove(chessMove);
+             GameData newData = new GameData(gameData.gameID(),gameData.whiteUsername(), gameData.blackUsername(), gameData.gameName(), game);
+             gameDAO.updateGame(gameID,newData);
+             String from = ChessPosition.stringPosition(chessMove.getStartPosition());
+             String to = ChessPosition.stringPosition(chessMove.getEndPosition());
+             var message = String.format("%s moved from %s to %s", visitorName,from,to);
+             var notification  = new NotificationMessage(message);
+             connections.broadcast(visitorName,notification, gameID);
+             var gameMessage = new LoadGameMessage(gameData);
+             connections.broadcast(null,gameMessage, gameID);
          } catch (Exception e) {
              throw new ResponseException(500,e.getMessage());
          }
