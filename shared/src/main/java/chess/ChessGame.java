@@ -15,11 +15,13 @@ public class ChessGame {
     private ChessBoard board;
     private TeamColor teamTurn;
     private boolean anyLegalMoves;
+    private boolean inGamePlay = true;
 
     public ChessGame() {
         board = new ChessBoard();
         board.resetBoard();
         setTeamTurn(TeamColor.WHITE);
+
     }
 
     /**
@@ -37,6 +39,11 @@ public class ChessGame {
     public void setTeamTurn(TeamColor team) {
         this.teamTurn = team;
     }
+
+
+    public void setGamePlay(boolean gamePlay){ this.inGamePlay = gamePlay;}
+
+    public boolean isInGamePlay(){ return inGamePlay;}
 
     @Override
     public boolean equals(Object o) {

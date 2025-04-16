@@ -76,7 +76,7 @@ public class ChessBoard {
             for (int i = 7; i > -1; i--) {
                 List<String> pieces = new ArrayList<>();
                 List<String> colors = new ArrayList<>();
-                for (int j = 7; j > -1; j--) {
+                for (int j = 0; j < 8; j++) {
                     drawMiddle(board, possibleMoves, startPosition, i, pieces, colors, j);
 
                 }
@@ -91,7 +91,7 @@ public class ChessBoard {
             for (int i = 0; i < 8; i++) {
                 List<String> pieces = new ArrayList<>();
                 List<String> colors = new ArrayList<>();
-                for (int j = 0; j < 8; j++) {
+                for (int j = 7; j > -1; j--) {
                     drawMiddle(board, possibleMoves, startPosition, i, pieces, colors, j);
                 }
                 drawRow(out, pieces, i+1, colors);
@@ -112,7 +112,7 @@ public class ChessBoard {
             colors.add(SET_BG_COLOR_LIGHT_PURPLE);
         }
         else {
-            if ((i + j) %2 == 0) {
+            if ((i + j) %2 == 1) {
                 if ((possibleMoves!=null)&&possibleMoves.contains(letters.get(j) + row)) {
                     colors.add(SET_BG_COLOR_DARK_PURPLE);}
                 else{colors.add(SET_BG_COLOR_LIGHT_BLUE);}
