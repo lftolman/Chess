@@ -184,7 +184,7 @@ public class ChessBoard {
     }
 
     public static String stringPosition(ChessPosition position){
-       return letters.get(position.getColumn()-1) + position.getRow();
+        return chess.ChessPosition.stringPosition(position);
     }
 
 

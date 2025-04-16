@@ -3,10 +3,7 @@ package ui;
 import static java.lang.Integer.parseInt;
 import static ui.EscapeSequences.*;
 
-import chess.ChessGame;
-import chess.ChessMove;
-import chess.ChessPosition;
-import chess.PieceMovesCalculator;
+import chess.*;
 import exception.ResponseException;
 import model.*;
 import net.REPL;
@@ -23,9 +20,9 @@ public class Client {
     public boolean loggedIn = false;
     public boolean inGamePlay = false;
     private final ServerFacade server;
-    private chess.ChessGame chessGame;
+    private GameData chessGame;
     private String color;
-    private HashMap<Integer, chess.ChessGame> games = new HashMap<>();
+    private HashMap<Integer, GameData> games = new HashMap<>();
     private List<Integer> uiMapping = new ArrayList<>();
 
     private WebSocketFacade ws;
@@ -59,34 +56,76 @@ public class Client {
     }
 
     public String leave() {
-        if (!inGamePlay){
-            return SET_TEXT_COLOR_RED + "must be in gameplay to resign";
+        try{
+            ws = new WebSocketFacade(serverUrl,notificationHandler);
+            if (!inGamePlay) {
+                return SET_TEXT_COLOR_RED + "must be in gameplay to resign";
+            }
+            ws.leave(authToken, chessGame.gameID());
+            inGamePlay = false;
+            return SET_TEXT_COLOR_GREEN + "successfully left the game";
+        } catch (Exception e) {
+            return SET_TEXT_COLOR_RED + "leave game unsuccessful" + e.getMessage();
         }
-        inGamePlay = false;
-        return SET_TEXT_COLOR_GREEN + "successfully left the game";
     }
 
     public String redraw() {
-        ChessBoard.drawBoard(color,chessGame.getBoard(),null,null);
+        ChessBoard.drawBoard(color,chessGame.game().getBoard(),null,null);
         return SET_TEXT_COLOR_GREEN + "redraw board successful";
 
     }
 
     private String make(String[] result) {
-        String from = result[1];
-        String to = result[2];
+        try {
+            if (!Objects.equals(color, chessGame.game().getTeamTurn().toString().toLowerCase())){
+                return SET_TEXT_COLOR_RED + "it's not your turn";
+            }
+            ws = new WebSocketFacade(serverUrl,notificationHandler);
+            chess.ChessBoard board = chessGame.game().getBoard();
+            ChessPiece.PieceType promo = null;
+            ChessPosition from = ChessBoard.chessPosition(result[1].split(""));
+            ChessPosition to = ChessBoard.chessPosition(result[2].split(""));
+            Collection<ChessMove> validMoves = chessGame.game().validMoves(from);
+            if (board.getPiece(from).getPieceType() == ChessPiece.PieceType.PAWN) {
+                for (var move : validMoves) {
+                    if (move.getPromotionPiece() != null && (move.getEndPosition() == to)) {
+                        if (result.length != 4) {
+                            return SET_TEXT_COLOR_RED + "promotion piece required";
+                        }
+                        promo = getPieceType(result[3]);
+                        if (promo == null) {
+                            return SET_TEXT_COLOR_RED + "promotion piece must be QUEEN or KNIGHT or BISHOP or ROOK";
+                        }
+                    }
+                }
+            }
+            ChessMove move = new ChessMove(from, to, promo);
+            if (!validMoves.contains(move)) {
+                return SET_TEXT_COLOR_RED + "invalid move, expecting <COLUMN><ROW>, type highlight for options,";
+            }
+            ChessGame game = chessGame.game();
 
-//        chessBoard.
-        return SET_TEXT_COLOR_GREEN + "move made successfully";
+            ws.makeMove(authToken, chessGame.gameID(), move);
+
+            return SET_TEXT_COLOR_GREEN + "move made successfully";
+        } catch (Exception e) {
+            return SET_TEXT_COLOR_RED + "make move unsuccessful, " + e.getMessage();
+        }
+
     }
 
     public String resign() {
-        if (!inGamePlay){
-            return SET_TEXT_COLOR_RED + "must be in gameplay to resign";
+        try {
+            ws = new WebSocketFacade(serverUrl, notificationHandler);
+            if (!inGamePlay) {
+                return SET_TEXT_COLOR_RED + "must be in gameplay to resign";
+            }
+            ws.resign(authToken, chessGame.gameID());
+            inGamePlay = false;
+            return SET_TEXT_COLOR_GREEN + "successfully left the game";
+        } catch (Exception e) {
+            return SET_TEXT_COLOR_RED + "resign unsuccessful, " + e.getMessage();
         }
-
-        inGamePlay = false;
-        return SET_TEXT_COLOR_GREEN + "successfully left the game";
     }
 
     public String highlight(String[] result) {
@@ -95,17 +134,17 @@ public class Client {
             return SET_TEXT_COLOR_RED + "invalid input, try again";
         }
         ChessPosition position = ChessBoard.chessPosition(characters);
-        chess.ChessBoard board = chessGame.getBoard();
-        Collection<ChessMove> moves =  chessGame.validMoves(position);
+        chess.ChessBoard board = chessGame.game().getBoard();
+        Collection<ChessMove> moves =  chessGame.game().validMoves(position);
         List<String> stringMoves = new ArrayList<>();
         if (moves.isEmpty()){
-            ChessBoard.drawBoard(color,chessGame.getBoard(),null,null);
+            ChessBoard.drawBoard(color,chessGame.game().getBoard(),null,null);
             return SET_TEXT_COLOR_GREEN + "no available moves for " + result[1];
         }
         for (var move : moves) {
             stringMoves.add(ChessBoard.stringPosition(move.getEndPosition()));
         }
-        ChessBoard.drawBoard(color,chessGame.getBoard(),stringMoves,ChessBoard.stringPosition(position));
+        ChessBoard.drawBoard(color,chessGame.game().getBoard(),stringMoves,ChessBoard.stringPosition(position));
 
         return SET_TEXT_COLOR_GREEN + "highlighted moves for " + result[1];
 
@@ -222,9 +261,9 @@ public class Client {
             ws = new WebSocketFacade(serverUrl,notificationHandler);
             int gameID = uiMapping.get(index);
             server.join(gameID, playerColor);
-            color = playerColor;
+            this.color = playerColor;
             chessGame = games.get(gameID);
-            ChessBoard.drawBoard(playerColor,chessGame.getBoard(),null,null );
+            ChessBoard.drawBoard(playerColor,chessGame.game().getBoard(),null,null );
             inGamePlay = true;
             ws.connect(authToken, gameID);
             return "game joined successfully";
@@ -252,7 +291,7 @@ public class Client {
             int gameID = uiMapping.get(index);
             chessGame = games.get(gameID);
             ws.connect(authToken, gameID);
-            ChessBoard.drawBoard("WHITE", chessGame.getBoard(), null,null);
+            ChessBoard.drawBoard("WHITE", chessGame.game().getBoard(), null,null);
             return "you are now observing the game";
         } catch (Exception e) {
             return SET_TEXT_COLOR_RED + "observe unsuccessful, " + e.getMessage();
@@ -277,7 +316,7 @@ public class Client {
         }
         try {
             ListGamesResult listGamesResult = server.listGames();
-            HashMap<Integer,chess.ChessGame> mapTwo = new HashMap<>();
+            HashMap<Integer,GameData> mapTwo = new HashMap<>();
             uiMapping.clear();
             int i = 0;
             StringBuilder sb = new StringBuilder();
@@ -286,7 +325,7 @@ public class Client {
             for (var game: listGamesResult.games()){
                 uiMapping.add(game.gameID());
                 i++;
-                mapTwo.put(game.gameID(),game.game());
+                mapTwo.put(game.gameID(),game);
                 String whiteUsername = game.whiteUsername();
                 String blackUsername = game.blackUsername();
                 int whiteLength = 0;
@@ -302,9 +341,7 @@ public class Client {
                 }
                 if (blackUsername == null){
                     blackUsername = "";
-                }
-//                map.put(i,game.gameID());
-                sb.append(i);
+                }sb.append(i);
                 sb.append(" ".repeat(10 - String.valueOf(i).length()));
                 sb.append(game.gameName());
                 sb.append(" ".repeat(13 - game.gameName().length()));
@@ -319,8 +356,16 @@ public class Client {
         } catch (Exception e) {
             return SET_TEXT_COLOR_RED + "list games unsuccessful, " + e.getMessage();
         }
+    }
 
-
+    private ChessPiece.PieceType getPieceType(String pieceString){
+        switch (pieceString.toLowerCase()){
+            case "queen" -> {return ChessPiece.PieceType.QUEEN;}
+            case "rook" -> {return ChessPiece.PieceType.ROOK;}
+            case "bishop" -> {return ChessPiece.PieceType.BISHOP;}
+            case "knight" -> {return ChessPiece.PieceType.KNIGHT;}
+        }
+        return null;
     }
 
 
