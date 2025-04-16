@@ -3,28 +3,38 @@ package ui;
 import static java.lang.Integer.parseInt;
 import static ui.EscapeSequences.*;
 
+import chess.ChessGame;
+import chess.ChessMove;
+import chess.ChessPosition;
+import chess.PieceMovesCalculator;
 import exception.ResponseException;
 import model.*;
 import net.REPL;
 import net.ServerFacade;
+import websocket.NotificationHandler;
+import websocket.WebSocketFacade;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 
 
 public class Client {
+    private final String serverUrl;
+    private final NotificationHandler notificationHandler;
     public boolean loggedIn = false;
     public boolean inGamePlay = false;
     private final ServerFacade server;
-//    private HashMap<Integer, Integer> gameIDs = new HashMap<>();
-    private HashMap<Integer, chess.ChessBoard> games = new HashMap<>();
-    private int viewerID = 0;
+    private chess.ChessGame chessGame;
+    private String color;
+    private HashMap<Integer, chess.ChessGame> games = new HashMap<>();
     private List<Integer> uiMapping = new ArrayList<>();
+
+    private WebSocketFacade ws;
+    private String authToken;
 
     public Client(String serverUrl, REPL repl){
         this.server = new ServerFacade(serverUrl);
+        this.notificationHandler = new NotificationHandler();
+        this.serverUrl = serverUrl;
 
     }
 
@@ -49,26 +59,54 @@ public class Client {
     }
 
     public String leave() {
+        if (!inGamePlay){
+            return SET_TEXT_COLOR_RED + "must be in gameplay to resign";
+        }
         inGamePlay = false;
         return SET_TEXT_COLOR_GREEN + "successfully left the game";
     }
 
     public String redraw() {
-
+        ChessBoard.drawBoard(color,chessGame.getBoard(),null,null);
         return SET_TEXT_COLOR_GREEN + "redraw board successful";
 
     }
 
     private String make(String[] result) {
-        return SET_TEXT_COLOR_GREEN + "Move made successfully";
+        String from = result[1];
+        String to = result[2];
+
+//        chessBoard.
+        return SET_TEXT_COLOR_GREEN + "move made successfully";
     }
 
     public String resign() {
+        if (!inGamePlay){
+            return SET_TEXT_COLOR_RED + "must be in gameplay to resign";
+        }
+
         inGamePlay = false;
         return SET_TEXT_COLOR_GREEN + "successfully left the game";
     }
 
     public String highlight(String[] result) {
+        String[] characters = result[1].split("");
+        if (!characters[1].matches("\\d")||!characters[0].matches("[a-zA-Z]")){
+            return SET_TEXT_COLOR_RED + "invalid input, try again";
+        }
+        ChessPosition position = ChessBoard.chessPosition(characters);
+        chess.ChessBoard board = chessGame.getBoard();
+        Collection<ChessMove> moves =  chessGame.validMoves(position);
+        List<String> stringMoves = new ArrayList<>();
+        if (moves.isEmpty()){
+            ChessBoard.drawBoard(color,chessGame.getBoard(),null,null);
+            return SET_TEXT_COLOR_GREEN + "no available moves for " + result[1];
+        }
+        for (var move : moves) {
+            stringMoves.add(ChessBoard.stringPosition(move.getEndPosition()));
+        }
+        ChessBoard.drawBoard(color,chessGame.getBoard(),stringMoves,ChessBoard.stringPosition(position));
+
         return SET_TEXT_COLOR_GREEN + "highlighted moves for " + result[1];
 
     }
@@ -83,7 +121,7 @@ public class Client {
                     "- to play chess";
             output = output + SET_TEXT_COLOR_LIGHT_BLUE+ "\nquit " +SET_TEXT_COLOR_PURPLE + "- playing chess";
         }
-        else if (loggedIn && !inGamePlay){
+        else if (!inGamePlay){
             output = output + SET_TEXT_COLOR_LIGHT_BLUE+"\nlist "+SET_TEXT_COLOR_PURPLE + "- games";
             output = output+SET_TEXT_COLOR_LIGHT_BLUE+"\ncreate <NAME> "+SET_TEXT_COLOR_PURPLE+
                     "- a game";
@@ -139,6 +177,7 @@ public class Client {
             LoginRequest request = new LoginRequest(result[1],result[2]);
             LoginResult loginResult = server.login(request);
             loggedIn = true;
+            authToken = loginResult.authToken();
             return SET_TEXT_COLOR_GREEN + "login successful for " + loginResult.username();
         } catch (ResponseException e) {
             return SET_TEXT_COLOR_RED  + e.getMessage();
@@ -154,9 +193,6 @@ public class Client {
         }
         try {
             CreateGameResult createGameResult = server.createGame(result[1]);
-//            viewerID++;
-//            gameIDs.put(viewerID,createGameResult.gameID());
-//            games.put(createGameResult.gameID(),new chess.ChessBoard());
             String listResult = list();
             return SET_TEXT_COLOR_GREEN + "game creation successful for game: "+ result[1];
         } catch (ResponseException e) {
@@ -169,7 +205,7 @@ public class Client {
             return SET_TEXT_COLOR_RED + "must be logged in";
         }
         if (result.length!=3){
-            return SET_TEXT_COLOR_RED  + "incorrect number of arguments, try again";
+            return SET_TEXT_COLOR_RED  + "incorrect number of arguments, expected <ID> [WHITE|BLACK]";
         }
         if (!result[1].chars().allMatch( Character::isDigit )){
             return SET_TEXT_COLOR_RED + "game nonexistent, run \"list\" to see options";
@@ -183,9 +219,14 @@ public class Client {
             return SET_TEXT_COLOR_RED + "player color must be WHITE or BLACK";
         }
         try {
+            ws = new WebSocketFacade(serverUrl,notificationHandler);
             int gameID = uiMapping.get(index);
             server.join(gameID, playerColor);
-            ChessBoard.drawBoard(playerColor,games.get(gameID),null,null );
+            color = playerColor;
+            chessGame = games.get(gameID);
+            ChessBoard.drawBoard(playerColor,chessGame.getBoard(),null,null );
+            inGamePlay = true;
+            ws.connect(authToken, gameID);
             return "game joined successfully";
         } catch (Exception e) {
             return SET_TEXT_COLOR_RED+ e.getMessage();
@@ -207,8 +248,11 @@ public class Client {
             return SET_TEXT_COLOR_RED + "game nonexistent, run \"list\" to see options";
         }
         try{
+            ws = new WebSocketFacade(serverUrl,notificationHandler);
             int gameID = uiMapping.get(index);
-            ChessBoard.drawBoard("WHITE", games.get(gameID), null,null);
+            chessGame = games.get(gameID);
+            ws.connect(authToken, gameID);
+            ChessBoard.drawBoard("WHITE", chessGame.getBoard(), null,null);
             return "you are now observing the game";
         } catch (Exception e) {
             return SET_TEXT_COLOR_RED + "observe unsuccessful, " + e.getMessage();
@@ -217,14 +261,13 @@ public class Client {
 
     public String logout(){
         if (!this.loggedIn){
-            return SET_TEXT_COLOR_RED + "must be logged in";
-        }
+            return SET_TEXT_COLOR_RED + "must be logged in";}
         try{
             server.logout();
         } catch(Exception e){
-            return SET_TEXT_COLOR_RED + "logout failed, " + e.getMessage();
-        }
+            return SET_TEXT_COLOR_RED + "logout failed, " + e.getMessage();}
         this.loggedIn = false;
+        authToken = null;
         return SET_TEXT_COLOR_GREEN + "logout successful";
     }
 
@@ -234,8 +277,7 @@ public class Client {
         }
         try {
             ListGamesResult listGamesResult = server.listGames();
-//            HashMap<Integer,Integer> map = new HashMap<>();
-            HashMap<Integer,chess.ChessBoard> mapTwo = new HashMap<>();
+            HashMap<Integer,chess.ChessGame> mapTwo = new HashMap<>();
             uiMapping.clear();
             int i = 0;
             StringBuilder sb = new StringBuilder();
@@ -244,7 +286,7 @@ public class Client {
             for (var game: listGamesResult.games()){
                 uiMapping.add(game.gameID());
                 i++;
-                mapTwo.put(game.gameID(),game.game().getBoard());
+                mapTwo.put(game.gameID(),game.game());
                 String whiteUsername = game.whiteUsername();
                 String blackUsername = game.blackUsername();
                 int whiteLength = 0;
@@ -272,7 +314,6 @@ public class Client {
                 sb.append(" ".repeat(16 - blackLength));
                 sb.append("\n");
             }
-            viewerID = i;
             this.games = mapTwo;
             return sb.toString();
         } catch (Exception e) {
@@ -281,7 +322,6 @@ public class Client {
 
 
     }
-
 
 
 }
