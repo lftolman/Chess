@@ -2,6 +2,7 @@ package server;
 
 import dataaccess.*;
 import exception.ResponseException;
+import server.websocket.WebSocketHandler;
 import spark.*;
 import service.*;
 
@@ -12,6 +13,7 @@ public class Server {
     private UserHandler userHandler;
     private GameHandler gameHandler;
     private ClearHandler clearHandler;
+    private WebSocketHandler websocketHandler;
 
     public Server(){
         try {
@@ -21,6 +23,7 @@ public class Server {
             userService = new UserService(userDAO,authDAO);
             gameService = new GameService(gameDAO,authDAO);
             clearService = new ClearService(gameDAO,authDAO,userDAO);
+            websocketHandler = new WebSocketHandler(gameDAO, userDAO, authDAO);
         } catch (ResponseException | DataAccessException e) {
             throw new RuntimeException(e);
         }
@@ -37,6 +40,8 @@ public class Server {
         Spark.staticFiles.location("web");
 
         // Register your endpoints and handle exceptions here.
+        Spark.webSocket("/ws", websocketHandler);
+
         Spark.post("/user", userHandler::register);
         Spark.post("/session", userHandler::login);
         Spark.delete("/session", userHandler::logout);
